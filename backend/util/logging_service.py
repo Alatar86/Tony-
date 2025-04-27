@@ -14,24 +14,31 @@ JSON_LOGGER_AVAILABLE = False
 try:
     # Try the new import location first (for newer versions)
     from pythonjsonlogger.json import JsonFormatter
+
     JSON_LOGGER_AVAILABLE = True
 except ImportError:
     try:
         # Fall back to the old location for backward compatibility
         from pythonjsonlogger.jsonlogger import JsonFormatter
+
         JSON_LOGGER_AVAILABLE = True
     except ImportError:
         # If import fails completely, log a warning and continue with standard formatter
-        logging.warning("python-json-logger package not found. Using standard formatter instead.")
+        logging.warning(
+            "python-json-logger package not found. Using standard formatter instead.",
+        )
+
         # Create a simple formatter that mimics JsonFormatter
         class FallbackFormatter(logging.Formatter):
             """Fallback formatter when JsonFormatter is not available"""
+
             def __init__(self, *args, **kwargs):
                 super().__init__("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-                
+
             def format(self, record):
                 # Use the standard formatter format method
                 return super().format(record)
+
         # Alias the FallbackFormatter as JsonFormatter for use in the code
         JsonFormatter = FallbackFormatter
 
@@ -49,12 +56,14 @@ class LoggingService:
             config_manager: ConfigurationManager instance for accessing configuration (optional)
         """
         self.config_manager = config_manager
-        
+
         # Get log level from environment variable, fall back to config or default
         self.log_level_name = os.environ.get("LOG_LEVEL", "INFO")
         if config_manager:
             self.log_level_name = config_manager.get(
-                "App", "log_level", fallback=self.log_level_name
+                "App",
+                "log_level",
+                fallback=self.log_level_name,
             )
 
         # Get log file path from environment variable, if set
@@ -99,7 +108,9 @@ class LoggingService:
                 json_ensure_ascii=False,
             )
         else:
-            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            )
 
         # Console handler (stdout)
         console_handler = logging.StreamHandler(sys.stdout)

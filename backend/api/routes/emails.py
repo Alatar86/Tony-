@@ -1,6 +1,7 @@
 """
 Email related routes (list, get, suggest, send, archive, delete, modify)
 """
+
 import logging
 
 from flask import Blueprint, current_app, jsonify, request
@@ -30,11 +31,13 @@ def list_emails():
 
     label_id = request.args.get("labelId", default="INBOX", type=str)
     max_results = request.args.get(
-        "maxResults", default=config_manager.getint("App", "max_emails_fetch"), type=int
+        "maxResults",
+        default=config_manager.getint("App", "max_emails_fetch"),
+        type=int,
     )
 
     logger.info(
-        f"API request: List emails for labelId='{label_id}', maxResults={max_results}"
+        f"API request: List emails for labelId='{label_id}', maxResults={max_results}",
     )
 
     try:
@@ -43,7 +46,8 @@ def list_emails():
             raise GmailApiError("Failed to initialize Gmail service")
 
         message_ids = gmail_service.list_messages(
-            label_id=label_id, max_results=max_results
+            label_id=label_id,
+            max_results=max_results,
         )
         if message_ids is None:
             logger.warning(f"list_messages returned None for labelId: {label_id}")
@@ -61,7 +65,7 @@ def list_emails():
 
             # Process message IDs in chunks to avoid hitting API rate limits
             logger.info(
-                f"Processing {len(message_ids)} IDs in chunks of {METADATA_BATCH_CHUNK_SIZE}..."
+                f"Processing {len(message_ids)} IDs in chunks of {METADATA_BATCH_CHUNK_SIZE}...",
             )
             for i in range(0, len(message_ids), METADATA_BATCH_CHUNK_SIZE):
                 chunk_ids = message_ids[i : i + METADATA_BATCH_CHUNK_SIZE]
@@ -69,12 +73,12 @@ def list_emails():
                 chunk_size = len(chunk_ids)
 
                 logger.debug(
-                    f"Fetching metadata for chunk {chunk_num}, size: {chunk_size}"
+                    f"Fetching metadata for chunk {chunk_num}, size: {chunk_size}",
                 )
                 try:
                     # Fetch metadata for just this chunk of IDs
                     chunk_metadata_dict = gmail_service.get_multiple_messages_metadata(
-                        chunk_ids
+                        chunk_ids,
                     )
 
                     # Merge results into the main dictionary
@@ -84,7 +88,7 @@ def list_emails():
                 except Exception as chunk_error:
                     # Log the error but continue with other chunks
                     logger.error(
-                        f"Error fetching metadata for chunk {chunk_num}: {chunk_error}"
+                        f"Error fetching metadata for chunk {chunk_num}: {chunk_error}",
                     )
 
             # Convert aggregated results to final list, filtering out None values
@@ -94,11 +98,11 @@ def list_emails():
                 if metadata is not None
             ]
             logger.info(
-                f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via chunked batch processing for labelId: {label_id}"
+                f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via chunked batch processing for labelId: {label_id}",
             )
         else:
             logger.info(
-                f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch."
+                f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch.",
             )
 
         return jsonify(emails)
@@ -162,7 +166,7 @@ def get_suggestions(message_id):
         if "in_reply_to" in details and details["in_reply_to"]:
             is_reply = True
             logger.info(
-                f"Email {message_id} is a reply - building conversation context"
+                f"Email {message_id} is a reply - building conversation context",
             )
             thread_id = details.get("thread_id")
             if thread_id:
@@ -176,7 +180,7 @@ def get_suggestions(message_id):
                                 details_list.append(msg_details)
                         except Exception as e:
                             logger.warning(
-                                f"Error getting thread message detail {msg_id}: {e}"
+                                f"Error getting thread message detail {msg_id}: {e}",
                             )
                     try:
                         details_list.sort(key=lambda x: x.get("internalDate", "0"))
@@ -205,7 +209,7 @@ def get_suggestions(message_id):
                                 if user_email and user_email in from_part
                                 else "Other party"
                             )
-                            thread_context += f"------- Message {i+1} -------\n"
+                            thread_context += f"------- Message {i + 1} -------\n"
                             thread_context += f"From: {from_part} ({sender_type})\n"
                             thread_context += f"{body}\n\n"
 
@@ -216,7 +220,7 @@ def get_suggestions(message_id):
 
             if is_replying_to_self:
                 logger.info(
-                    "User is attempting to reply to their own email in thread context"
+                    "User is attempting to reply to their own email in thread context",
                 )
                 suggestions = [
                     "Did you mean to add more information to your previous message?",
@@ -226,7 +230,9 @@ def get_suggestions(message_id):
             else:
                 logger.info("Generating suggestions with thread context")
                 suggestions = llm_service.get_suggestions_with_context(
-                    details["body"], thread_context, is_reply
+                    details["body"],
+                    thread_context,
+                    is_reply,
                 )
         else:
             logger.info("Generating suggestions for standalone email")
@@ -267,7 +273,7 @@ def archive_email(message_id):
                 "success": True,
                 "message": "Email archived successfully",
                 "message_id": message_id,
-            }
+            },
         )
 
     except (AuthError, GmailApiError, NotFoundError):
@@ -300,7 +306,7 @@ def delete_email(message_id):
                 "success": True,
                 "message": "Email deleted successfully",
                 "message_id": message_id,
-            }
+            },
         )
 
     except (AuthError, GmailApiError, NotFoundError):
@@ -349,7 +355,7 @@ def send_email():
                 "success": True,
                 "message": "Email sent successfully",
                 "message_id": result.get("id"),
-            }
+            },
         )
 
     except (AuthError, GmailApiError, ValidationError):
@@ -402,10 +408,12 @@ def modify_email_labels(message_id):
                 raise ValidationError("No action or label modifications specified")
 
             logger.info(
-                f"Modifying labels for {message_id}: add={add_labels}, remove={remove_labels}"
+                f"Modifying labels for {message_id}: add={add_labels}, remove={remove_labels}",
             )
             result = gmail_service.modify_message_labels(
-                message_id, add_labels, remove_labels
+                message_id,
+                add_labels,
+                remove_labels,
             )
             if not result:
                 raise GmailApiError("Failed to modify labels")
@@ -416,7 +424,7 @@ def modify_email_labels(message_id):
                     "message": "Labels modified successfully",
                     "message_id": message_id,
                     # Optional: return the modified message resource from result if available
-                }
+                },
             )
 
     except (AuthError, GmailApiError, NotFoundError, ValidationError):

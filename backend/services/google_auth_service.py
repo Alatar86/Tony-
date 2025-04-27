@@ -5,12 +5,10 @@ This service handles OAuth 2.0 authentication with Google Gmail API.
 It manages the authentication flow, token acquisition, storage, and refresh.
 """
 
-import contextlib
 import importlib.resources
 import json
 import logging
 import os
-from pathlib import Path
 
 from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
@@ -79,7 +77,8 @@ class GoogleAuthService:
                         token_dict = token_data
 
                     self.credentials = Credentials.from_authorized_user_info(
-                        token_dict, self.scopes
+                        token_dict,
+                        self.scopes,
                     )
                 except Exception as e:
                     logger.error(f"Error parsing token data: {e}")
@@ -164,33 +163,35 @@ class GoogleAuthService:
         try:
             # Try to load client secrets from environment variables first
             client_secrets_config = self._load_client_secrets_from_env()
-            
+
             # If we have client secrets from environment variables, use them
             if client_secrets_config:
                 logger.info("Using client secrets from environment variables")
                 flow = InstalledAppFlow.from_client_config(
                     client_secrets_config,
                     self.scopes,
-                    redirect_uri="http://localhost:0/oauth2callback"
+                    redirect_uri="http://localhost:0/oauth2callback",
                 )
             else:
                 # Fall back to package resources if environment variables not set
-                logger.warning("Environment variables for client secrets not found, falling back to package resources")
+                logger.warning(
+                    "Environment variables for client secrets not found, falling back to package resources",
+                )
                 try:
                     # Python 3.9+ way: traverses(<package>).joinpath(<resource>).open(<mode>)
                     resource_path = importlib.resources.files(
-                        "backend.resources"
+                        "backend.resources",
                     ).joinpath("client_secret.json")
-                    
+
                     with resource_path.open("r") as client_secrets_stream:
                         logger.info(
-                            "Loading client secrets from package resource: backend/resources/client_secret.json"
+                            "Loading client secrets from package resource: backend/resources/client_secret.json",
                         )
                         client_secrets_config = json.load(client_secrets_stream)
                         flow = InstalledAppFlow.from_client_config(
                             client_secrets_config,
                             self.scopes,
-                            redirect_uri="http://localhost:0/oauth2callback"
+                            redirect_uri="http://localhost:0/oauth2callback",
                         )
                 except FileNotFoundError:
                     error_msg = "Bundled client_secret.json resource not found in backend.resources package."
@@ -287,20 +288,20 @@ class GoogleAuthService:
             raise
         except Exception as e:
             logger.exception(
-                f"Unhandled exception during OAuth flow: {e}"
+                f"Unhandled exception during OAuth flow: {e}",
             )  # Use logger.exception to include stack trace
             raise AuthError(
-                f"An unexpected error occurred during the OAuth flow: {str(e)}"
+                f"An unexpected error occurred during the OAuth flow: {str(e)}",
             )
-    
+
     def _load_client_secrets_from_env(self):
         """
         Load client secrets from environment variables.
-        
+
         Tries two approaches:
         1. Load JSON content directly from GOOGLE_CLIENT_SECRET_JSON_CONTENT
         2. Load from a file path specified in GOOGLE_CLIENT_SECRET_JSON_PATH
-        
+
         Returns:
             dict: Client secrets configuration or None if not found
         """
@@ -308,17 +309,23 @@ class GoogleAuthService:
         json_content = os.environ.get("GOOGLE_CLIENT_SECRET_JSON_CONTENT")
         if json_content:
             try:
-                logger.info("Loading client secrets from GOOGLE_CLIENT_SECRET_JSON_CONTENT")
+                logger.info(
+                    "Loading client secrets from GOOGLE_CLIENT_SECRET_JSON_CONTENT",
+                )
                 return json.loads(json_content)
             except json.JSONDecodeError as e:
                 logger.error(f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}")
-                raise ConfigError(f"Invalid JSON in GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}")
-        
+                raise ConfigError(
+                    f"Invalid JSON in GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}",
+                )
+
         # Try to load from file path specified in environment variable
         json_path = os.environ.get("GOOGLE_CLIENT_SECRET_JSON_PATH")
         if json_path:
             try:
-                logger.info(f"Loading client secrets from path in GOOGLE_CLIENT_SECRET_JSON_PATH: {json_path}")
+                logger.info(
+                    f"Loading client secrets from path in GOOGLE_CLIENT_SECRET_JSON_PATH: {json_path}",
+                )
                 with open(json_path, "r") as f:
                     return json.load(f)
             except FileNotFoundError:
@@ -326,10 +333,12 @@ class GoogleAuthService:
                 raise ConfigError(f"Client secrets file not found at path: {json_path}")
             except json.JSONDecodeError as e:
                 logger.error(f"Error parsing client secrets file at {json_path}: {e}")
-                raise ConfigError(f"Invalid JSON in client secrets file at {json_path}: {e}")
+                raise ConfigError(
+                    f"Invalid JSON in client secrets file at {json_path}: {e}",
+                )
             except Exception as e:
                 logger.error(f"Error reading client secrets file at {json_path}: {e}")
                 raise ConfigError(f"Error reading client secrets file: {e}")
-        
+
         # If neither environment variable is set, return None
         return None

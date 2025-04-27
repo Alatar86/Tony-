@@ -115,14 +115,14 @@ class ApiServer:
         @self.app.errorhandler(ValidationError)
         def handle_validation_error(error):
             logger.warning(
-                f"Validation error: {error.message}"
+                f"Validation error: {error.message}",
             )  # Usually client error, log as warning
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(NotFoundError)
         def handle_not_found_error(error):
             logger.warning(
-                f"Resource not found: {error.message}"
+                f"Resource not found: {error.message}",
             )  # Usually client error, log as warning
             return jsonify(error.to_dict()), error.code
 
@@ -133,7 +133,7 @@ class ApiServer:
             logger.info(f"Not found: {request.path}")
             # Ensure consistent JSON format
             nf_error = NotFoundError(
-                f"The requested URL {request.path} was not found on this server."
+                f"The requested URL {request.path} was not found on this server.",
             )
             return jsonify(nf_error.to_dict()), nf_error.code
 
@@ -152,7 +152,7 @@ class ApiServer:
             """Handle generic 500 Internal Server Error"""
             # Log the original exception if possible
             logger.exception(
-                f"Internal server error processing {request.path}: {error}"
+                f"Internal server error processing {request.path}: {error}",
             )
             ise_error = ServiceError("An internal server error occurred.", code=500)
             return jsonify(ise_error.to_dict()), ise_error.code

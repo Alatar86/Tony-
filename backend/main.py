@@ -2,6 +2,7 @@
 Main entry point for Privacy-Focused Email Agent Backend
 This module provides the core functionality for running the backend server.
 """
+
 import logging
 
 from backend.api.api_server import ApiServer
@@ -14,7 +15,7 @@ def init_logging():
     """Initialize logging configuration"""
     try:
         from backend.util.logging_service import LoggingService
-        
+
         # Initialize the LoggingService without config_manager
         # It will use environment variables for configuration
         LoggingService()
@@ -24,7 +25,9 @@ def init_logging():
             level=logging.INFO,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         )
-        logging.warning("Could not import LoggingService, using basic logging configuration")
+        logging.warning(
+            "Could not import LoggingService, using basic logging configuration",
+        )
 
 
 def run_server():

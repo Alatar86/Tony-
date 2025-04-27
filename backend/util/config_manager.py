@@ -38,10 +38,16 @@ class ConfigurationManager:
             possible_locations = [
                 "config.ini",  # Current directory
                 os.path.join(
-                    os.path.dirname(__file__), "..", "..", "config.ini"
+                    os.path.dirname(__file__),
+                    "..",
+                    "..",
+                    "config.ini",
                 ),  # Project root
                 os.path.join(
-                    os.path.dirname(__file__), "..", "config", "config.ini"
+                    os.path.dirname(__file__),
+                    "..",
+                    "config",
+                    "config.ini",
                 ),  # backend/config
             ]
 
@@ -59,16 +65,18 @@ class ConfigurationManager:
             self.config.read(config_file)
             # Add logging to check signature right after load
             loaded_signature = self.config.get(
-                "User", "signature", fallback="<NOT FOUND>"
+                "User",
+                "signature",
+                fallback="<NOT FOUND>",
             )
             logger.info(f"Signature loaded from config file: '{loaded_signature}'")
-            
+
             # Apply environment variable overrides
             self._apply_env_overrides()
         else:
             logger.warning(f"Configuration file not found: {config_file}")
             self._create_default_config()
-            
+
             # Apply environment variable overrides to default config
             self._apply_env_overrides()
 
@@ -79,40 +87,51 @@ class ConfigurationManager:
         For example, [api] base_url could be overridden with APP_API_BASE_URL
         """
         logger.debug("Checking for environment variable overrides")
-        
+
         # Iterate through all sections and options in the config
         for section in self.config.sections():
             for key in self.config[section]:
                 # Construct the environment variable name: APP_SECTION_KEY
                 env_var_name = f"{self.ENV_PREFIX}{section}_{key}".upper()
                 env_value = os.environ.get(env_var_name)
-                
+
                 if env_value is not None:
                     # Try to convert the environment variable value to the same type as the original config value
                     original_value = self.config[section][key]
                     converted_value = self._convert_value(env_value, original_value)
-                    
+
                     # Update the configuration
                     self.config[section][key] = converted_value
-                    logger.info(f"Configuration override from environment: [{section}] {key} = {converted_value}")
+                    logger.info(
+                        f"Configuration override from environment: [{section}] {key} = {converted_value}",
+                    )
 
     def _convert_value(self, env_value, original_value):
         """
         Attempt to convert an environment variable value to the same type as the original value.
-        
+
         Args:
             env_value (str): The value from the environment variable
             original_value (str): The original value from the config file
-            
+
         Returns:
             The converted value, or the original string if conversion fails
         """
         try:
             # Try boolean conversion first (special case)
-            if original_value.lower() in ('true', 'false', 'yes', 'no', 'on', 'off', '1', '0'):
+            if original_value.lower() in (
+                "true",
+                "false",
+                "yes",
+                "no",
+                "on",
+                "off",
+                "1",
+                "0",
+            ):
                 # Keep as string to maintain configparser compatibility
                 return env_value
-                
+
             # Try integer conversion
             try:
                 int(original_value)
@@ -120,7 +139,7 @@ class ConfigurationManager:
                 return env_value
             except ValueError:
                 pass
-                
+
             # Try float conversion
             try:
                 float(original_value)
@@ -128,12 +147,14 @@ class ConfigurationManager:
                 return env_value
             except ValueError:
                 pass
-                
+
             # Default: return as string
             return env_value
-            
+
         except Exception as e:
-            logger.warning(f"Failed to convert environment variable value {env_value} to appropriate type: {e}")
+            logger.warning(
+                f"Failed to convert environment variable value {env_value} to appropriate type: {e}",
+            )
             return env_value
 
     def get(self, section, key, fallback=None):
@@ -182,10 +203,16 @@ class ConfigurationManager:
         """Save current configuration to potentially multiple files."""
         # Define potential file paths
         root_config_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "config.ini"
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "config.ini",
         )
         backend_config_path = os.path.join(
-            os.path.dirname(__file__), "..", "config", "config.ini"
+            os.path.dirname(__file__),
+            "..",
+            "config",
+            "config.ini",
         )
 
         # Determine the primary file being managed (based on __init__ logic)
@@ -193,28 +220,28 @@ class ConfigurationManager:
         if not primary_config_file:
             primary_config_file = "config.ini"  # Default if none was found/set
             logger.warning(
-                f"No primary config file path determined, defaulting to: {primary_config_file}"
+                f"No primary config file path determined, defaulting to: {primary_config_file}",
             )
 
         files_to_save = [primary_config_file]
         # Add the other known location if it exists and is different
         other_path = None
         if primary_config_file == root_config_path and os.path.exists(
-            backend_config_path
+            backend_config_path,
         ):
             other_path = backend_config_path
         elif primary_config_file == backend_config_path and os.path.exists(
-            root_config_path
+            root_config_path,
         ):
             other_path = root_config_path
         elif primary_config_file == "config.ini" and os.path.exists(
-            backend_config_path
+            backend_config_path,
         ):
             # Handle case where default "config.ini" in root is used
             other_path = backend_config_path
 
         if other_path and os.path.abspath(other_path) != os.path.abspath(
-            primary_config_file
+            primary_config_file,
         ):
             files_to_save.append(other_path)
 

@@ -31,16 +31,18 @@ def sync_configs(root_dir):
         # Log signature value BEFORE merge
         root_signature = root_config.get("User", "signature", fallback="<NOT SET>")
         logger.info(
-            f"SYNC: Signature read from ROOT config BEFORE merge: '{root_signature}'"
+            f"SYNC: Signature read from ROOT config BEFORE merge: '{root_signature}'",
         )
     if backend_exists:
         backend_config.read(backend_config_path)
         # Log signature value BEFORE merge
         backend_signature = backend_config.get(
-            "User", "signature", fallback="<NOT SET>"
+            "User",
+            "signature",
+            fallback="<NOT SET>",
         )
         logger.info(
-            f"SYNC: Signature read from BACKEND config BEFORE merge: '{backend_signature}'"
+            f"SYNC: Signature read from BACKEND config BEFORE merge: '{backend_signature}'",
         )
 
     if not root_exists and not backend_exists:
@@ -61,7 +63,7 @@ def sync_configs(root_dir):
 
     elif not backend_exists:
         logger.info(
-            "Backend config file does not exist. Copying root config to backend."
+            "Backend config file does not exist. Copying root config to backend.",
         )
         # Copy root to backend
         try:
@@ -77,7 +79,7 @@ def sync_configs(root_dir):
     else:
         # Both exist, merge root into backend (root takes precedence)
         logger.info(
-            "Both config files exist. Merging configurations (root takes precedence)."
+            "Both config files exist. Merging configurations (root takes precedence).",
         )
         needs_update = False
         merged_config = configparser.ConfigParser()
@@ -98,12 +100,12 @@ def sync_configs(root_dir):
         # Log the final merged signature value BEFORE writing
         final_signature = merged_config.get("User", "signature", fallback="<NOT SET>")
         logger.info(
-            f"SYNC: Final merged signature value BEFORE writing: '{final_signature}'"
+            f"SYNC: Final merged signature value BEFORE writing: '{final_signature}'",
         )
 
         if needs_update:
             logger.info(
-                "Configurations differ. Writing merged configuration to both files."
+                "Configurations differ. Writing merged configuration to both files.",
             )
             try:
                 # Write to backend config

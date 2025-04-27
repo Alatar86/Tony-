@@ -9,7 +9,8 @@ import sys
 
 # Configure verbose logging
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 # Add the project root directory to Python's path
@@ -77,7 +78,7 @@ def main():
         print("\nChecking current auth status...")
         status = auth_service.check_auth_status()
         print(
-            f"Current auth status: {'Authenticated' if status else 'Not authenticated'}"
+            f"Current auth status: {'Authenticated' if status else 'Not authenticated'}",
         )
 
         # Step 5: Start auth flow if needed
@@ -89,7 +90,7 @@ def main():
             try:
                 success = auth_service.initiate_auth_flow()
                 print(
-                    f"\nAuthentication flow completed: {'Successfully' if success else 'Failed'}"
+                    f"\nAuthentication flow completed: {'Successfully' if success else 'Failed'}",
                 )
             except Exception as e:
                 print(f"\n✗ Error during authentication: {e}")
@@ -97,7 +98,7 @@ def main():
             # Check status again
             status = auth_service.check_auth_status()
             print(
-                f"Auth status after flow: {'Authenticated' if status else 'Not authenticated'}"
+                f"Auth status after flow: {'Authenticated' if status else 'Not authenticated'}",
             )
 
     except Exception as e:

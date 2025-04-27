@@ -1,6 +1,7 @@
 """
 Status endpoint
 """
+
 import logging
 
 from flask import Blueprint, current_app, jsonify
@@ -26,7 +27,7 @@ def status():
             {
                 "gmail_authenticated": gmail_authenticated,
                 "local_ai_service_status": ai_service_status,
-            }
+            },
         )
     except Exception as e:
         logger.exception("Error checking status")

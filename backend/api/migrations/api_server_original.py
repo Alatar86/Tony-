@@ -107,7 +107,7 @@ class ApiServer:
                         "message": "Authentication successful"
                         if success
                         else "Authentication failed",
-                    }
+                    },
                 )
             except Exception as e:
                 logger.exception("Error during authentication")
@@ -138,7 +138,9 @@ class ApiServer:
                         # Use appropriate getter based on expected type (optional, but good practice)
                         if key == "max_emails_fetch":
                             value = self.config_manager.getint(
-                                section, key, fallback=50
+                                section,
+                                key,
+                                fallback=50,
                             )
                         else:
                             value = self.config_manager.get(section, key, fallback="")
@@ -180,16 +182,18 @@ class ApiServer:
                         for key, value in settings.items():
                             if key not in ["api_base_url", "model_name"]:
                                 logger.warning(
-                                    f"Ignoring invalid Ollama setting: {key}"
+                                    f"Ignoring invalid Ollama setting: {key}",
                                 )
                                 continue
 
                             # Update the value in the ConfigParser object
                             self.config_manager.config.set(
-                                section, key, str(value)
+                                section,
+                                key,
+                                str(value),
                             )  # Store as string
                             logger.info(
-                                f"Configuration updated: [{section}] {key} = {value}"
+                                f"Configuration updated: [{section}] {key} = {value}",
                             )
                             updated_any = True
 
@@ -201,10 +205,12 @@ class ApiServer:
 
                             # Update the value in the ConfigParser object
                             self.config_manager.config.set(
-                                section, key, str(value)
+                                section,
+                                key,
+                                str(value),
                             )  # Store as string
                             logger.info(
-                                f"Configuration updated: [{section}] {key} = {value}"
+                                f"Configuration updated: [{section}] {key} = {value}",
                             )
                             updated_any = True
 
@@ -220,10 +226,12 @@ class ApiServer:
 
                             # Update the value in the ConfigParser object
                             self.config_manager.config.set(
-                                section, key, str(value)
+                                section,
+                                key,
+                                str(value),
                             )  # Store as string
                             logger.info(
-                                f"Configuration updated: [{section}] {key} = {value}"
+                                f"Configuration updated: [{section}] {key} = {value}",
                             )
                             updated_any = True
                     else:
@@ -241,7 +249,7 @@ class ApiServer:
                         logger.info("LLM service re-initialized after config update.")
 
                 return jsonify(
-                    {"success": True, "message": "Configuration updated successfully."}
+                    {"success": True, "message": "Configuration updated successfully."},
                 )
 
             except ValidationError:
@@ -268,7 +276,7 @@ class ApiServer:
             )
 
             logger.info(
-                f"API request: List emails for labelId='{label_id}', maxResults={max_results}"
+                f"API request: List emails for labelId='{label_id}', maxResults={max_results}",
             )
 
             try:
@@ -279,24 +287,25 @@ class ApiServer:
 
                 # Step 1: Get message IDs using the label_id
                 message_ids = gmail_service.list_messages(
-                    label_id=label_id, max_results=max_results
+                    label_id=label_id,
+                    max_results=max_results,
                 )
                 if (
                     message_ids is None
                 ):  # list_messages should return [], but defensive check
                     logger.warning(
-                        f"list_messages returned None for labelId: {label_id}"
+                        f"list_messages returned None for labelId: {label_id}",
                     )
                     message_ids = []
 
                 logger.info(
-                    f"Found {len(message_ids)} message IDs for labelId: {label_id}"
+                    f"Found {len(message_ids)} message IDs for labelId: {label_id}",
                 )
 
                 # Step 2: Get metadata for all message IDs using the new batch method
                 if message_ids:
                     metadata_dict = gmail_service.get_multiple_messages_metadata(
-                        message_ids
+                        message_ids,
                     )
                     # Filter out any None results (where individual fetches failed) and get list of metadata dicts
                     emails = [
@@ -305,12 +314,12 @@ class ApiServer:
                         if metadata is not None
                     ]
                     logger.info(
-                        f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via batch for labelId: {label_id}"
+                        f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via batch for labelId: {label_id}",
                     )
                 else:
                     emails = []  # No IDs found, so no metadata to fetch
                     logger.info(
-                        f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch."
+                        f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch.",
                     )
 
                 return jsonify(emails)
@@ -374,7 +383,7 @@ class ApiServer:
                 if "in_reply_to" in details and details["in_reply_to"]:
                     is_reply = True
                     logger.info(
-                        f"Email {message_id} is a reply - building conversation context"
+                        f"Email {message_id} is a reply - building conversation context",
                     )
 
                     # Get thread ID from the message
@@ -382,7 +391,7 @@ class ApiServer:
                     if thread_id:
                         # Get all messages in this thread to build context
                         thread_messages = gmail_service.list_messages(
-                            thread_id=thread_id
+                            thread_id=thread_id,
                         )
 
                         if thread_messages:
@@ -394,21 +403,22 @@ class ApiServer:
                                 if msg_id != message_id:  # Skip the current message
                                     try:
                                         msg_details = gmail_service.get_message_details(
-                                            msg_id
+                                            msg_id,
                                         )
                                         if msg_details:
                                             conversation.append(
                                                 {
                                                     "from": msg_details.get(
-                                                        "from", "(Unknown)"
+                                                        "from",
+                                                        "(Unknown)",
                                                     ),
                                                     "body": msg_details.get("body", ""),
                                                     "date": msg_details.get("date", ""),
-                                                }
+                                                },
                                             )
                                     except Exception as e:
                                         logger.warning(
-                                            f"Error getting thread message {msg_id}: {e}"
+                                            f"Error getting thread message {msg_id}: {e}",
                                         )
 
                             # Build thread context (limit to 2 previous messages to avoid excessive context)
@@ -444,7 +454,9 @@ class ApiServer:
                                         else "Other party"
                                     )
 
-                                    thread_context += f"------- Message {i+1} -------\n"
+                                    thread_context += (
+                                        f"------- Message {i + 1} -------\n"
+                                    )
                                     thread_context += (
                                         f"From: {from_part} ({sender_type})\n"
                                     )
@@ -526,7 +538,7 @@ class ApiServer:
                         "success": True,
                         "message": "Email archived successfully",
                         "message_id": message_id,
-                    }
+                    },
                 )
 
             except (AuthError, GmailApiError, NotFoundError):
@@ -559,7 +571,7 @@ class ApiServer:
                         "success": True,
                         "message": "Email deleted successfully",
                         "message_id": message_id,
-                    }
+                    },
                 )
 
             except (AuthError, GmailApiError, NotFoundError):
@@ -611,7 +623,7 @@ class ApiServer:
                         "success": True,
                         "message": "Email sent successfully",
                         "message_id": result.get("id"),
-                    }
+                    },
                 )
 
             except (AuthError, GmailApiError, ValidationError):
@@ -649,7 +661,9 @@ class ApiServer:
 
                 # Modify the message labels
                 result = gmail_service.modify_message_labels(
-                    message_id, add_labels, remove_labels
+                    message_id,
+                    add_labels,
+                    remove_labels,
                 )
                 if not result:
                     raise GmailApiError("Failed to modify email labels")
@@ -659,7 +673,7 @@ class ApiServer:
                         "success": True,
                         "message": "Email labels modified successfully",
                         "message_id": message_id,
-                    }
+                    },
                 )
 
             except (AuthError, GmailApiError, NotFoundError, ValidationError):
@@ -683,7 +697,7 @@ class ApiServer:
                     {
                         "gmail_authenticated": gmail_authenticated,
                         "local_ai_service_status": ai_service_status,
-                    }
+                    },
                 )
             except Exception as e:
                 logger.exception("Error checking status")

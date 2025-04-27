@@ -1,6 +1,7 @@
 """
 Authentication related routes
 """
+
 import logging
 
 from flask import Blueprint, current_app, jsonify
@@ -35,7 +36,7 @@ def auth_login():
                 "message": "Authentication successful"
                 if success
                 else "Authentication failed",
-            }
+            },
         )
     except Exception as e:
         # Log the exception within the route
