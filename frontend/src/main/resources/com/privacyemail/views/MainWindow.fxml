@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.privacyemail.controllers.MainWindowController">
+
+    <top>
+        <ToolBar>
+            <Button fx:id="refreshButton" text="Refresh" onAction="#handleRefreshAction"/>
+            <Button fx:id="composeButton" text="Compose" onAction="#handleComposeAction"/>
+            <Button fx:id="settingsButton" text="Settings" onAction="#handleSettingsAction"/>
+            <Button fx:id="loginButton" text="Login" onAction="#handleLoginAction"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <!-- Main horizontal SplitPane with 3 panels -->
+        <SplitPane fx:id="mainSplitPane" dividerPositions="0.15, 0.42" styleClass="main-split-pane">
+            <!-- Left panel: Folders -->
+            <VBox fx:id="sidebar" styleClass="sidebar" spacing="2" style="-fx-padding: 5;">
+                <Label text="FOLDERS" style="-fx-padding: 5 10 5 10; -fx-font-weight: bold;"/>
+                <HBox fx:id="inboxFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Inbox" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="starredFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Starred" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="sentFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Sent" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="draftsFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Drafts" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="spamFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Spam" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <HBox fx:id="trashFolder" spacing="10" styleClass="sidebar-item" alignment="CENTER_LEFT">
+                    <Label text="Trash" HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <Region VBox.vgrow="ALWAYS" />
+            </VBox>
+
+            <!-- Middle panel: Email List -->
+            <VBox spacing="5" styleClass="email-list-panel">
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="folderTitleLabel" text="Inbox" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <ProgressIndicator fx:id="emailListProgress" visible="false" prefHeight="16" prefWidth="16"/>
+                </HBox>
+                <ListView fx:id="emailListView" VBox.vgrow="ALWAYS" styleClass="email-list-view">
+                    <VBox.margin>
+                        <Insets top="5" />
+                    </VBox.margin>
+                </ListView>
+            </VBox>
+
+            <!-- Right panel: Email Detail -->
+            <VBox spacing="5" styleClass="email-detail-panel">
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+
+                <!-- Email Details Section -->
+                <VBox spacing="5" fx:id="emailDetailsBox" VBox.vgrow="ALWAYS">
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="Subject:" minWidth="60"/>
+                        <Label fx:id="subjectLabel" text="--" HBox.hgrow="ALWAYS" wrapText="true"/>
+                        <ProgressIndicator fx:id="emailDetailProgress" visible="false" prefHeight="16" prefWidth="16"/>
+                    </HBox>
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="From:" minWidth="60"/>
+                        <Label fx:id="fromLabel" text="--" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="Date:" minWidth="60"/>
+                        <Label fx:id="dateLabel" text="--" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <Separator/>
+                    <WebView fx:id="emailBodyView" VBox.vgrow="ALWAYS" styleClass="email-body-view"/>
+                </VBox>
+
+                <!-- Action Buttons -->
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
+                    <Button fx:id="replyButton" text="Reply" onAction="#handleReplyAction"/>
+                    <Button fx:id="suggestButton" text="Suggest Replies" onAction="#handleSuggestAction"/>
+                    <Button fx:id="markReadButton" text="Mark Read" onAction="#handleMarkReadAction"/>
+                    <Button fx:id="markUnreadButton" text="Mark Unread" onAction="#handleMarkUnreadAction"/>
+                    <ProgressIndicator fx:id="suggestionsProgress" visible="false" prefHeight="16" prefWidth="16"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="archiveButton" text="Archive" onAction="#handleArchiveAction"/>
+                    <Button fx:id="deleteButton" text="Delete" onAction="#handleDeleteAction"/>
+                </HBox>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" styleClass="status-bar" style="-fx-padding: 5;" alignment="CENTER_LEFT">
+            <Label text="Gmail Status:"/>
+            <Label fx:id="gmailStatusLabel" text="Unknown"/>
+            <Label text="AI Status:"/>
+            <Label fx:id="aiStatusLabel" text="Unknown"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <ProgressIndicator fx:id="globalProgress" visible="false" prefHeight="16" prefWidth="16"/>
+            <Label fx:id="statusMessageLabel" text="" style="-fx-font-style: italic;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

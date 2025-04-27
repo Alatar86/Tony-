@@ -1,0 +1,400 @@
+/*
+ * Dark Theme CSS for Privacy-Focused Email Agent
+ */
+
+/* ------------------- */
+/* Global Application Styles */
+/* ------------------- */
+
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #2b2b2b;
+    -fx-control-inner-background: #3c3f41;
+    -fx-text-background-color: #bbbbbb;
+    -fx-text-fill: #e6e6e6;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.label {
+    -fx-text-fill: #bbbbbb;
+}
+
+/* ------------------- */
+/* Header / Toolbar Styles */
+/* ------------------- */
+
+.tool-bar {
+    -fx-background-color: #1e1e1e;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #2a2a2a;
+}
+
+.tool-bar .button {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e6e6e6;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: #3d3d3d;
+}
+
+.logo-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.compose-button {
+    -fx-background-color: #2b74d2;
+    -fx-text-fill: white;
+}
+
+.compose-button:hover {
+    -fx-background-color: #3a83e1;
+}
+
+/* ------------------- */
+/* Split Pane Styles */
+/* ------------------- */
+
+.split-pane {
+    -fx-background-color: #1e1e1e;
+    -fx-padding: 0;
+}
+
+.split-pane-divider {
+    -fx-background-color: #2a2a2a;
+    -fx-padding: 0 1 0 1;
+}
+
+.main-split-pane {
+    -fx-background-color: #2b2b2b;
+}
+
+.split-pane > .split-pane-divider {
+    -fx-background-color: #2a2a2a;
+    -fx-padding: 0 1 0 1;
+}
+
+/* Enhanced divider styling for better visibility */
+.split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: #333333;
+    -fx-padding: 0 1 0 1;
+    -fx-border-color: #444444;
+    -fx-border-width: 0 1px 0 1px;
+}
+
+.split-pane:vertical > .split-pane-divider {
+    -fx-background-color: #333333;
+    -fx-padding: 1 0 1 0;
+    -fx-border-color: #444444;
+    -fx-border-width: 1px 0 1px 0;
+}
+
+/* ------------------- */
+/* Sidebar Styles */
+/* ------------------- */
+
+.sidebar {
+    -fx-background-color: #1e1e1e;
+    -fx-padding: 0;
+}
+
+.sidebar-item {
+    -fx-padding: 8px 12px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #e0e0e0;
+    -fx-cursor: hand;
+}
+
+/* Target labels specifically within sidebar items with more specificity */
+.sidebar-item .label {
+    -fx-text-fill: #e0e0e0 !important; /* Using !important temporarily to debug CSS specificity issues */
+}
+
+.sidebar-item.selected {
+    -fx-background-color: #2b74d2;
+    -fx-text-fill: white;
+}
+
+.sidebar-item.selected .label {
+    -fx-text-fill: white;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: #2a2a2a;
+}
+
+.sidebar-label {
+    -fx-text-fill: #e0e0e0;
+    -fx-font-size: 11px;
+    -fx-padding: 4px 12px;
+}
+
+.sidebar-count {
+    -fx-text-fill: #bfbfbf;
+    -fx-padding: 2px 6px;
+}
+
+/* ------------------- */
+/* Email List Styles */
+/* ------------------- */
+
+.email-list-panel {
+    -fx-background-color: #2b2b2b;
+}
+
+.email-list-view {
+    -fx-background-color: #3c3f41;
+}
+
+.list-view {
+    -fx-background-color: #2b2b2b;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+.list-cell {
+    -fx-text-fill: #bbbbbb;
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #2a2a2a;
+}
+
+.list-cell:filled:selected, .list-cell:filled:selected:focused {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #252525;
+}
+
+.list-cell .email-subject {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.list-cell .email-sender {
+    -fx-font-size: 12px;
+    -fx-text-fill: #bfbfbf;
+}
+
+.list-cell .email-preview {
+    -fx-font-size: 12px;
+    -fx-text-fill: #999999;
+}
+
+.list-cell .email-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #999999;
+    -fx-alignment: center-right;
+}
+
+.sort-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #999999;
+    -fx-padding: 4px 8px;
+}
+
+/* ------------------- */
+/* Email Content Styles */
+/* ------------------- */
+
+.email-detail-panel {
+    -fx-background-color: #2b2b2b;
+}
+
+.email-body-view {
+    -fx-background-color: #2b2b2b;
+}
+
+.email-header {
+    -fx-padding: 10px;
+    -fx-background-color: #2b2b2b;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #3c3f41;
+}
+
+.email-header-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #bfbfbf;
+    -fx-padding: 2px 0;
+}
+
+.subject-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.text-area {
+    -fx-background-color: #3c3f41;
+    -fx-text-fill: #bbbbbb;
+}
+
+.text-area .content {
+    -fx-background-color: #3c3f41;
+}
+
+/* ------------------- */
+/* Button Styles */
+/* ------------------- */
+
+.button {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e6e6e6;
+    -fx-background-radius: 4px;
+}
+
+.button:hover {
+    -fx-background-color: #3d3d3d;
+}
+
+.button:pressed {
+    -fx-background-color: #4d4d4d;
+}
+
+/* ------------------- */
+/* Settings Window */
+/* ------------------- */
+
+.settings-pane {
+    -fx-background-color: #2b2b2b;
+    -fx-padding: 20px;
+}
+
+.combo-box-base {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #2a2a2a;
+    -fx-border-radius: 4px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #bbbbbb;
+    -fx-padding: 3px 8px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #2a2a2a;
+}
+
+/* ------------------- */
+/* Alert Dialogs */
+/* ------------------- */
+
+.dialog-pane {
+    -fx-background-color: #2b2b2b;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #1e1e1e;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #e6e6e6;
+}
+
+.dialog-pane .content {
+    -fx-text-fill: #bbbbbb;
+}
+
+.dialog-pane .button-bar .button {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e6e6e6;
+}
+
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color: #3d3d3d;
+}
+
+/* ------------------- */
+/* Tab Pane */
+/* ------------------- */
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #2b2b2b;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #1e1e1e;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #3c3f41;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #bbbbbb;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #e6e6e6;
+}
+
+/* ------------------- */
+/* Web View */
+/* ------------------- */
+
+.web-view {
+    -fx-background-color: #2b2b2b;
+    -fx-font-smoothing-type: lcd;
+}
+
+.web-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 14;
+}
+
+.web-view .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 7;
+}
+
+/* Important: Apply dark backgrounds to all internal WebView components */
+.web-view .web-page {
+    -fx-background-color: #2b2b2b;
+}
+
+.web-view .scroll-pane {
+    -fx-background-color: #2b2b2b;
+}
+
+.web-view .scroll-pane .viewport {
+    -fx-background-color: #2b2b2b;
+}
+
+.web-view .scroll-pane .content {
+    -fx-background-color: #2b2b2b;
+}
+
+/* Additional properties to ensure no white flashing */
+.web-view .page-corner {
+    -fx-background-color: #2b2b2b;
+}
+
+.web-view-error-message {
+    -fx-background-color: #2b2b2b;
+    -fx-padding: 10px;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 1px;
+    -fx-text-fill: #e6e6e6;
+}
+
+/* ------------------- */
+/* Status Bar */
+/* ------------------- */
+
+.status-bar {
+    -fx-background-color: #1e1e1e;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #2d2d2d;
+}

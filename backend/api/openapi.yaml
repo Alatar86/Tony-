@@ -1,0 +1,584 @@
+openapi: 3.0.3
+info:
+  title: Privacy-Focused Email Agent API
+  description: REST API for the Privacy-Focused Email Agent
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+servers:
+  - url: http://localhost:5000
+    description: Development server
+tags:
+  - name: Authentication
+    description: Authentication operations
+  - name: Configuration
+    description: Application configuration
+  - name: Emails
+    description: Email operations
+  - name: Status
+    description: Status and health checks
+
+paths:
+  /auth/status:
+    get:
+      tags:
+        - Authentication
+      summary: Check authentication status
+      description: Checks if the user is authenticated with Gmail
+      responses:
+        '200':
+          description: Authentication status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    example: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Initiate OAuth login flow
+      description: Starts the OAuth authentication process with Google
+      responses:
+        '200':
+          description: Authentication initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Authentication successful
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /config:
+    get:
+      tags:
+        - Configuration
+      summary: Get application configuration
+      description: Retrieves the current application configuration settings
+      responses:
+        '200':
+          description: Configuration settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Ollama:
+                    type: object
+                    properties:
+                      api_base_url:
+                        type: string
+                        example: http://localhost:11434
+                      model_name:
+                        type: string
+                        example: llama2
+                  App:
+                    type: object
+                    properties:
+                      max_emails_fetch:
+                        type: integer
+                        example: 50
+                  User:
+                    type: object
+                    properties:
+                      signature:
+                        type: string
+                        example: "Best regards,\nJohn Smith"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Configuration
+      summary: Update application configuration
+      description: Updates the application configuration settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Ollama:
+                  type: object
+                  properties:
+                    api_base_url:
+                      type: string
+                      example: http://localhost:11434
+                    model_name:
+                      type: string
+                      example: llama2
+                App:
+                  type: object
+                  properties:
+                    max_emails_fetch:
+                      type: integer
+                      example: 50
+                User:
+                  type: object
+                  properties:
+                    signature:
+                      type: string
+                      example: "Best regards,\nJohn Smith"
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Configuration updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails:
+    get:
+      tags:
+        - Emails
+      summary: List emails
+      description: Retrieves a list of email metadata from Gmail
+      parameters:
+        - name: label_id
+          in: query
+          description: Gmail label ID to filter emails
+          schema:
+            type: string
+            default: INBOX
+      responses:
+        '200':
+          description: List of email metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmailMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/{message_id}:
+    get:
+      tags:
+        - Emails
+      summary: Get email details
+      description: Retrieves the full details of a specific email
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: The Gmail message ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailDetails'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/{message_id}/suggestions:
+    get:
+      tags:
+        - Emails
+      summary: Get reply suggestions
+      description: Generates AI-powered reply suggestions for an email
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: The Gmail message ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reply suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - "Thank you for your email. I'll review this and get back to you soon."
+                      - "I appreciate your message. Let me consider this and respond in detail."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/{message_id}/archive:
+    post:
+      tags:
+        - Emails
+      summary: Archive an email
+      description: Archives an email by removing it from the inbox
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: The Gmail message ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email archived successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email archived successfully
+                  message_id:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/{message_id}/delete:
+    delete:
+      tags:
+        - Emails
+      summary: Delete an email
+      description: Deletes an email by moving it to trash
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: The Gmail message ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email deleted successfully
+                  message_id:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/send:
+    post:
+      tags:
+        - Emails
+      summary: Send an email
+      description: Sends a new email or a reply
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: string
+                  example: recipient@example.com
+                subject:
+                  type: string
+                  example: Hello from Privacy Email
+                body:
+                  type: string
+                  example: This is a test email.
+                reply_to:
+                  type: string
+                  description: Optional message ID to reply to
+              required:
+                - to
+                - subject
+                - body
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email sent successfully
+                  message_id:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /emails/{message_id}/modify:
+    post:
+      tags:
+        - Emails
+      summary: Modify email labels
+      description: Add or remove labels from an email
+      parameters:
+        - name: message_id
+          in: path
+          required: true
+          description: The Gmail message ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                add_labels:
+                  type: array
+                  items:
+                    type: string
+                  example: ["IMPORTANT"]
+                remove_labels:
+                  type: array
+                  items:
+                    type: string
+                  example: ["UNREAD"]
+      responses:
+        '200':
+          description: Labels modified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Labels modified successfully
+                  message_id:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /status:
+    get:
+      tags:
+        - Status
+      summary: Get backend status
+      description: Checks the status of backend services including Gmail API and Ollama
+      responses:
+        '200':
+          description: Backend status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    EmailMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 17c43c0b8d6a5e3f
+        thread_id:
+          type: string
+          example: 17c43c0b8d6a5e3f
+        subject:
+          type: string
+          example: Hello World
+        from:
+          type: string
+          example: John Smith <john@example.com>
+        date:
+          type: string
+          format: date-time
+          example: 2023-05-01T12:00:00Z
+        snippet:
+          type: string
+          example: This is a preview of the email content...
+        unread:
+          type: boolean
+          example: true
+        labels:
+          type: array
+          items:
+            type: string
+          example: ["INBOX", "UNREAD"]
+
+    EmailDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 17c43c0b8d6a5e3f
+        thread_id:
+          type: string
+          example: 17c43c0b8d6a5e3f
+        subject:
+          type: string
+          example: Hello World
+        from:
+          type: string
+          example: John Smith <john@example.com>
+        to:
+          type: string
+          example: jane@example.com
+        date:
+          type: string
+          format: date-time
+          example: 2023-05-01T12:00:00Z
+        body:
+          type: string
+          example: This is the full content of the email.
+        is_html:
+          type: boolean
+          example: true
+        message_id:
+          type: string
+          example: <CAJHLRUjnO+JY@mail.gmail.com>
+        references:
+          type: string
+          example: <CAJHLRUjnO+JY@mail.gmail.com>
+        in_reply_to:
+          type: string
+          example: <CAJHLRUjnO+JY@mail.gmail.com>
+
+    StatusResponse:
+      type: object
+      properties:
+        gmail_authenticated:
+          type: boolean
+          example: true
+        ai_service_status:
+          type: string
+          enum: [active, inactive, error]
+          example: active
+        version:
+          type: string
+          example: 1.0.0
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Invalid request parameters
+              code:
+                type: integer
+                example: 400
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Authentication required
+              code:
+                type: integer
+                example: 401
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Resource not found
+              code:
+                type: integer
+                example: 404
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: An unexpected error occurred
+              code:
+                type: integer
+                example: 500

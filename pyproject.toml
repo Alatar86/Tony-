@@ -1,0 +1,67 @@
+[tool.ruff]
+# Enable flake8-bugbear (`B`) rules.
+select = ["E", "F", "W", "I", "B", "COM", "C4"]
+ignore = []
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Target Python version
+target-version = "py310"
+
+# Exclude files and folders
+exclude = [
+    ".git",
+    ".pytest_cache",
+    "__pycache__",
+    "venv",
+    ".venv",
+]
+
+# Allow imports relative to the "backend" directory
+src = ["backend"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with spaces
+indent-style = "space"
+# Use parentheses for line continuation on binary operators
+line-ending = "auto"
+
+[tool.ruff.isort]
+known-first-party = ["backend"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+strict_optional = true
+
+# Per-module options:
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# Ignore missing imports for third-party libraries without stubs
+[[tool.mypy.overrides]]
+module = [
+    "google.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-v"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.privacyemail.controllers.SettingsController"
+      spacing="15" style="-fx-padding: 20;" prefWidth="550" prefHeight="420">
+
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Application Settings" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <ProgressIndicator fx:id="settingsProgress" visible="false" prefHeight="16" prefWidth="16"/>
+    </HBox>
+
+    <TabPane fx:id="settingsTabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+        <!-- General Tab -->
+        <Tab text="General">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <GridPane hgap="10" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="160"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- UI Settings -->
+                    <Label text="User Interface" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 0 0 5 0;"/>
+
+                    <Label text="Theme:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="themeComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                              GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
+
+                    <!-- App Settings -->
+                    <Label text="Email Settings" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+
+                    <Label text="Max Emails Fetch Count:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextField fx:id="maxEmailsField" promptText="e.g., 50" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets top="10" bottom="10"/>
+                    </padding>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <!-- Reading Tab -->
+        <Tab text="Reading">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <GridPane hgap="10" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="160"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- Email Display Settings -->
+                    <Label text="Email Display" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 0 0 5 0;"/>
+
+                    <Label text="Load External Images:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="imageLoadComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                              GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
+
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets top="10" bottom="10"/>
+                    </padding>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <!-- AI Tab -->
+        <Tab text="AI">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <GridPane hgap="10" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="160"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- Ollama Settings -->
+                    <Label text="Ollama API Settings" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 0 0 5 0;"/>
+
+                    <Label text="API Base URL:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="ollamaUrlField" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                              promptText="e.g., http://localhost:11434"/>
+
+                    <Label text="Model Name:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="ollamaModelField" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                               promptText="e.g., llama2, mixtral"/>
+
+                    <!-- AI Feature Settings -->
+                    <Label text="AI Features" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+
+                    <Label text="Reply Suggestions:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                    <javafx.scene.control.CheckBox fx:id="enableAiSuggestionsToggle" text="Enable AI Reply Suggestions"
+                                 GridPane.rowIndex="4" GridPane.columnIndex="1" selected="true" />
+
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets top="10" bottom="10"/>
+                    </padding>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <!-- Account Tab -->
+        <Tab text="Account">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <GridPane hgap="10" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="160"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- Account Settings (Placeholder) -->
+                    <Label text="Google Account" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 0 0 5 0;"/>
+
+                    <Label text="Account Status:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label text="Authenticated" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                           fx:id="accountStatusLabel"/>
+
+                    <!-- Email Signature -->
+                    <Label text="Email Settings" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 10 0 5 0;"/>
+
+                    <Label text="Email Signature:" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.valignment="TOP">
+                        <GridPane.margin>
+                            <Insets top="5" />
+                        </GridPane.margin>
+                    </Label>
+                    <VBox GridPane.rowIndex="3" GridPane.columnIndex="1">
+                        <Label text="The signature will be added to the end of your emails:"
+                               style="-fx-font-style: italic; -fx-font-size: 11px;" />
+                        <javafx.scene.control.TextArea fx:id="signatureTextArea" prefHeight="100" wrapText="true"
+                                                      promptText="Enter your email signature here" />
+                    </VBox>
+
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="120.0" prefHeight="130.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets top="10" bottom="10"/>
+                    </padding>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <!-- Advanced Tab -->
+        <Tab text="Advanced">
+            <VBox spacing="10" style="-fx-padding: 10;">
+                <GridPane hgap="10" vgap="8">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="NEVER" minWidth="160"/>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                    </columnConstraints>
+
+                    <!-- Log Level Settings -->
+                    <Label text="Logging" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                           style="-fx-font-weight: bold; -fx-padding: 0 0 5 0;"/>
+
+                    <Label text="Log Level:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="logLevelComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                              GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
+
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <padding>
+                        <Insets top="10" bottom="10"/>
+                    </padding>
+                </GridPane>
+            </VBox>
+        </Tab>
+    </TabPane>
+
+    <!-- Status Message -->
+    <Label fx:id="statusLabel" style="-fx-font-style: italic;"/>
+
+    <!-- Buttons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+         <Button fx:id="applyButton" text="Apply" onAction="#handleApplyButtonAction"/>
+         <Button fx:id="saveButton" text="Save" onAction="#handleSaveButtonAction" defaultButton="true"/>
+         <Button fx:id="cancelButton" text="Cancel" onAction="#handleCancelButtonAction" cancelButton="true"/>
+         <padding>
+             <Insets top="10"/>
+         </padding>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.privacyemail.controllers.SuggestionsController"
+      spacing="15" style="-fx-padding: 20;">
+
+    <Label text="Choose a Reply Suggestion:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+
+    <Label text="Click one option below to use it as your email reply:" style="-fx-font-style: italic;"/>
+
+    <!-- Suggestion 1 -->
+    <VBox fx:id="suggestion1Pane"
+          style="-fx-border-color: #3498db; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 15; -fx-cursor: hand; -fx-background-color: #eef6fd;"
+          VBox.vgrow="NEVER">
+        <Label fx:id="suggestion1Label" wrapText="true" style="-fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Suggestion 2 -->
+    <VBox fx:id="suggestion2Pane"
+          style="-fx-border-color: #3498db; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 15; -fx-cursor: hand; -fx-background-color: #eef6fd;"
+          VBox.vgrow="NEVER">
+        <Label fx:id="suggestion2Label" wrapText="true" style="-fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Suggestion 3 -->
+    <VBox fx:id="suggestion3Pane"
+          style="-fx-border-color: #3498db; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 15; -fx-cursor: hand; -fx-background-color: #eef6fd;"
+          VBox.vgrow="NEVER">
+        <Label fx:id="suggestion3Label" wrapText="true" style="-fx-font-size: 14px;"/>
+    </VBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button fx:id="cancelButton" text="Cancel" onAction="#handleCancelAction"/>
+    </HBox>
+
+</VBox>

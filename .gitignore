@@ -1,0 +1,87 @@
+# Python standard ignores
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.venv/
+ENV/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Java ignores
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+target/
+.classpath
+.project
+.settings/
+
+# JavaScript/Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp/
+.pnp.js
+coverage/
+.next/
+.nuxt/
+dist/
+.cache/
+package-lock.json
+
+# Project-specific files to ignore
+client_secret*.json
+token*.json
+*.log
+config.ini
+.env
+.env.*
+backend_app.log
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor folders
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Exception to allow config files that Claude needs to access
+!config.ini
+!complete_config.ini
+!config_backup.ini
+!config_complete.ini
+!config_new.ini
+!fixed_config.ini

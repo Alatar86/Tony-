@@ -1,0 +1,49 @@
+/*
+ * CSS for improving WebView scrolling performance
+ */
+
+/* Enable hardware acceleration for all elements */
+* {
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  transform: translateZ(0);
+
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Improve scrolling performance */
+  backface-visibility: hidden;
+}
+
+/* Apply smooth scrolling to the document */
+html, body {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize scrolling */
+body {
+  will-change: scroll-position;
+  overflow-y: scroll;
+  overscroll-behavior: none;
+}
+
+/* Optimize large elements that may cause jankiness */
+img, table, iframe, video, div {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Smooth transitions for elements that might change */
+.email-body * {
+  transition: opacity 0.1s ease;
+}

@@ -1,0 +1,367 @@
+/*
+ * Light Theme CSS for Privacy-Focused Email Agent
+ */
+
+/* ------------------- */
+/* Global Application Styles */
+/* ------------------- */
+
+.root {
+    -fx-base: #f8f9fa;
+    -fx-background: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-background-color: #212529;
+    -fx-text-fill: #212529;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.label {
+    -fx-text-fill: #212529;
+}
+
+/* ------------------- */
+/* Header / Toolbar Styles */
+/* ------------------- */
+
+.tool-bar {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #dee2e6;
+}
+
+.tool-bar .button {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #212529;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+}
+
+.tool-bar .button:hover {
+    -fx-background-color: #dde2e6;
+}
+
+.logo-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.compose-button {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}
+
+.compose-button:hover {
+    -fx-background-color: #0b5ed7;
+}
+
+/* ------------------- */
+/* Split Pane Styles */
+/* ------------------- */
+
+.split-pane {
+    -fx-background-color: #ffffff;
+    -fx-padding: 0;
+}
+
+.split-pane-divider {
+    -fx-background-color: #e9ecef;
+    -fx-padding: 0 1 0 1;
+}
+
+.main-split-pane {
+    -fx-background-color: #ffffff;
+}
+
+/* ------------------- */
+/* Sidebar Styles */
+/* ------------------- */
+
+.sidebar {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 0;
+}
+
+.sidebar-item {
+    -fx-padding: 8px 12px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #212529;
+    -fx-cursor: hand;
+}
+
+.sidebar-item.selected {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}
+
+.sidebar-item.selected .label {
+    -fx-text-fill: white;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.sidebar-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 11px;
+    -fx-padding: 4px 12px;
+}
+
+.sidebar-count {
+    -fx-text-fill: #6c757d;
+    -fx-padding: 2px 6px;
+}
+
+/* ------------------- */
+/* Email List Styles */
+/* ------------------- */
+
+.email-list-panel {
+    -fx-background-color: #ffffff;
+}
+
+.email-list-view {
+    -fx-background-color: #ffffff;
+}
+
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+.list-cell {
+    -fx-text-fill: #212529;
+    -fx-background-color: transparent;
+    -fx-padding: 10px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #e9ecef;
+}
+
+.list-cell:filled:selected, .list-cell:filled:selected:focused {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+.list-cell .email-subject {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.list-cell .email-sender {
+    -fx-font-size: 12px;
+    -fx-text-fill: #495057;
+}
+
+.list-cell .email-preview {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6c757d;
+}
+
+.list-cell .email-date {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6c757d;
+    -fx-alignment: center-right;
+}
+
+.sort-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6c757d;
+    -fx-padding: 4px 8px;
+}
+
+/* ------------------- */
+/* Email Content Styles */
+/* ------------------- */
+
+.email-detail-panel {
+    -fx-background-color: #ffffff;
+}
+
+.email-body-view {
+    -fx-background-color: #ffffff;
+}
+
+.email-header {
+    -fx-padding: 10px;
+    -fx-background-color: #f8f9fa;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #dee2e6;
+}
+
+.email-header-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #495057;
+    -fx-padding: 2px 0;
+}
+
+.subject-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.text-area {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #212529;
+}
+
+.text-area .content {
+    -fx-background-color: #ffffff;
+}
+
+/* ------------------- */
+/* Button Styles */
+/* ------------------- */
+
+.button {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #212529;
+    -fx-background-radius: 4px;
+}
+
+.button:hover {
+    -fx-background-color: #dde2e6;
+}
+
+.button:pressed {
+    -fx-background-color: #ced4da;
+}
+
+/* ------------------- */
+/* Settings Window */
+/* ------------------- */
+
+.settings-pane {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20px;
+}
+
+.combo-box-base {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 4px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #212529;
+    -fx-padding: 3px 8px;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+}
+
+/* ------------------- */
+/* Alert Dialogs */
+/* ------------------- */
+
+.dialog-pane {
+    -fx-background-color: #ffffff;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #212529;
+    -fx-font-weight: bold;
+}
+
+.dialog-pane .content {
+    -fx-text-fill: #212529;
+}
+
+.dialog-pane .button-bar .button {
+    -fx-background-color: #e9ecef;
+    -fx-text-fill: #212529;
+}
+
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color: #dde2e6;
+}
+
+/* ------------------- */
+/* Tab Pane */
+/* ------------------- */
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #f8f9fa;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #e9ecef;
+    -fx-background-radius: 4px 4px 0 0;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 1px 0 1px;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #495057;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #212529;
+}
+
+/* ------------------- */
+/* Web View */
+/* ------------------- */
+
+.web-view {
+    -fx-background-color: #ffffff;
+    -fx-font-smoothing-type: lcd;
+}
+
+.web-view-error-message {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 10px;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px;
+    -fx-text-fill: #212529;
+}
+
+/* Additional styles to improve email rendering */
+.web-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 14;
+}
+
+.web-view .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 7;
+}
+
+.web-view .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+}
+
+.web-view .scroll-bar:vertical .thumb:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ------------------- */
+/* Status Bar */
+/* ------------------- */
+
+.status-bar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #dee2e6;
+}

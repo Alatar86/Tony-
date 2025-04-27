@@ -1,0 +1,43 @@
+/* WebView dark theme stylesheet - applied directly to WebView content */
+
+/* Basic elements */
+html, body {
+    background-color: #2b2b2b !important;
+    color: #bbbbbb !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Keep email formatting but ensure dark background */
+body * {
+    background-color: transparent;
+}
+
+/* Override white backgrounds but preserve structure */
+body > table,
+body > div,
+body > center {
+    background-color: #2b2b2b !important;
+}
+
+/* Links */
+a, a:link, a:visited {
+    color: #0d6efd !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+    background-color: #2b2b2b !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 5px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}

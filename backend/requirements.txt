@@ -1,0 +1,10 @@
+# Backend dependencies
+Flask>=2.0.0  # API Framework (you can switch to FastAPI if preferred)
+google-api-python-client>=2.95.0  # Google API Client
+google-auth-oauthlib>=1.0.0  # OAuth 2.0 for Google APIs
+google-auth-httplib2>=0.1.0  # HTTP Library for Google Auth (explicit requirement for timeouts)
+requests>=2.30.0  # HTTP Client for Ollama API
+keyring>=24.0.0  # Secure Token Storage
+python-dotenv>=1.0.0  # Environment variable loading (optional)
+beautifulsoup4>=4.12.0  # HTML parsing library for email content extraction
+python-json-logger>=2.0.7  # JSON formatter for logging

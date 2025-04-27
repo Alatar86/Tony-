@@ -1,0 +1,56 @@
+# Trusted domains list for Privacy Email client
+# One domain per line, no comments after domain names
+
+# Major email providers
+gmail.com
+googlemail.com
+google.com
+outlook.com
+live.com
+hotmail.com
+yahoo.com
+ymail.com
+mail.com
+icloud.com
+me.com
+aol.com
+aim.com
+protonmail.com
+proton.me
+tutanota.com
+gmx.com
+gmx.net
+
+# Major tech companies
+microsoft.com
+apple.com
+amazon.com
+facebook.com
+meta.com
+instagram.com
+linkedin.com
+twitter.com
+github.com
+gitlab.com
+stackoverflow.com
+wikipedia.org
+wikidata.org
+wikimedia.org
+
+# Banking/Financial
+paypal.com
+visa.com
+mastercard.com
+amex.com
+americanexpress.com
+chase.com
+bankofamerica.com
+wellsfargo.com
+citibank.com
+
+# Government & Educational
+.gov
+.edu
+.mil
+
+# Add your own trusted domains below

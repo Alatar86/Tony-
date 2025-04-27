@@ -1,0 +1,7 @@
+# Development dependencies
+ruff>=0.1.5            # Linting and formatting
+mypy>=1.5.1            # Type checking
+pre-commit>=3.5.0      # Pre-commit hooks framework
+pytest>=7.4.0          # Testing framework
+pytest-cov>=4.1.0      # Test coverage
+python-json-logger>=2.0.7  # JSON formatter for logging
