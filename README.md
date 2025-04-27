@@ -84,6 +84,21 @@ The project uses pre-commit hooks to enforce code quality standards before commi
    pre-commit run --all-files
    ```
 
+### Continuous Integration
+
+This project uses GitHub Actions for continuous integration. The CI workflow:
+
+- Runs automatically on pushes to the master branch and pull requests
+- Tests against Python 3.11
+- Runs linting checks using Ruff
+- Ensures proper code formatting with Ruff
+- Performs type checking with Mypy
+- Executes tests with pytest and collects coverage metrics
+
+The CI pipeline configuration is located in `.github/workflows/backend-ci.yml`.
+
+[![Backend CI](https://github.com/Alatar86/Tony-/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Alatar86/Tony-/actions/workflows/backend-ci.yml)
+
 ### Configuration
 
 - Code style and linting rules are configured in `pyproject.toml`
