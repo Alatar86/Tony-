@@ -53,7 +53,7 @@ class LoggingService:
         Initialize the LoggingService.
 
         Args:
-            config_manager: ConfigurationManager instance for accessing 
+            config_manager: ConfigurationManager instance for accessing
                 configuration (optional)
         """
         self.config_manager = config_manager

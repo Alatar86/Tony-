@@ -27,7 +27,7 @@ class ConfigurationManager:
         Initialize the ConfigurationManager.
 
         Args:
-            config_file (str): Path to the configuration file 
+            config_file (str): Path to the configuration file
                 (default: look in standard locations)
         """
         # Look for config in standard locations if not specified
@@ -94,7 +94,7 @@ class ConfigurationManager:
                 env_value = os.environ.get(env_var_name)
 
                 if env_value is not None:
-                    # Try to convert the environment variable value 
+                    # Try to convert the environment variable value
                     # to the same type as the original config value
                     original_value = self.config[section][key]
                     converted_value = self._convert_value(env_value, original_value)
@@ -108,7 +108,7 @@ class ConfigurationManager:
 
     def _convert_value(self, env_value, original_value):
         """
-        Attempt to convert an environment variable value to the same type 
+        Attempt to convert an environment variable value to the same type
         as the original value.
 
         Args:
@@ -121,8 +121,14 @@ class ConfigurationManager:
         try:
             # Try boolean conversion first (special case)
             if original_value.lower() in (
-                "true", "false", "yes", "no", 
-                "on", "off", "1", "0",
+                "true",
+                "false",
+                "yes",
+                "no",
+                "on",
+                "off",
+                "1",
+                "0",
             ):
                 # Keep as string to maintain configparser compatibility
                 return env_value
@@ -130,7 +136,7 @@ class ConfigurationManager:
             # Try integer conversion
             try:
                 int(original_value)
-                # If successful, just return the string 
+                # If successful, just return the string
                 # as configparser handles the conversion
                 return env_value
             except ValueError:
@@ -170,9 +176,7 @@ class ConfigurationManager:
         try:
             return self.config.get(section, key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            logger.warning(
-                f"Configuration not found: [{section}] {key}. {e}"
-            )
+            logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
     def getint(self, section, key, fallback=None):
@@ -180,9 +184,7 @@ class ConfigurationManager:
         try:
             return self.config.getint(section, key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            logger.warning(
-                f"Configuration not found: [{section}] {key}. {e}"
-            )
+            logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
     def getfloat(self, section, key, fallback=None):
@@ -190,9 +192,7 @@ class ConfigurationManager:
         try:
             return self.config.getfloat(section, key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            logger.warning(
-                f"Configuration not found: [{section}] {key}. {e}"
-            )
+            logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
     def getboolean(self, section, key, fallback=None):
@@ -200,9 +200,7 @@ class ConfigurationManager:
         try:
             return self.config.getboolean(section, key)
         except (configparser.NoSectionError, configparser.NoOptionError) as e:
-            logger.warning(
-                f"Configuration not found: [{section}] {key}. {e}"
-            )
+            logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
     def save(self):
@@ -281,7 +279,7 @@ class ConfigurationManager:
             ),
             "token_cache_path": "token_storage",
             "scopes": "https://www.googleapis.com/auth/gmail.readonly,"
-                     "https://www.googleapis.com/auth/gmail.send",
+            "https://www.googleapis.com/auth/gmail.send",
         }
 
         # Ollama section

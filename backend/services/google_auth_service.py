@@ -181,7 +181,7 @@ class GoogleAuthService:
                     "falling back to package resources",
                 )
                 try:
-                    # Python 3.9+ way: 
+                    # Python 3.9+ way:
                     # traverses(<package>).joinpath(<resource>).open(<mode>)
                     resource_path = importlib.resources.files(
                         "backend.resources",
@@ -199,8 +199,10 @@ class GoogleAuthService:
                             redirect_uri="http://localhost:0/oauth2callback",
                         )
                 except FileNotFoundError as e:
-                    error_msg = ("Bundled client_secret.json resource not found in "
-                                "backend.resources package.")
+                    error_msg = (
+                        "Bundled client_secret.json resource not found in "
+                        "backend.resources package."
+                    )
                     logger.error(error_msg)
                     raise ConfigError(error_msg) from e
                 except Exception as e:
@@ -280,7 +282,7 @@ class GoogleAuthService:
             self.credentials = flow.run_local_server(
                 port=0,  # Use any available port
                 # Always ask for consent to ensure we get refresh tokens
-                prompt="consent",  
+                prompt="consent",
                 success_message=success_message,
                 open_browser=True,
                 authorization_prompt_message=(
@@ -327,9 +329,7 @@ class GoogleAuthService:
                 )
                 return json.loads(json_content)
             except json.JSONDecodeError as e:
-                logger.error(
-                    f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}"
-                )
+                logger.error(f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}")
                 raise ConfigError(
                     f"Invalid JSON in GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}",
                 ) from e
@@ -356,9 +356,7 @@ class GoogleAuthService:
                 ) from e
             except Exception as e:
                 logger.error(f"Error reading client secrets file at {json_path}: {e}")
-                raise ConfigError(
-                    f"Error reading client secrets file: {e}"
-                ) from e
+                raise ConfigError(f"Error reading client secrets file: {e}") from e
 
         # If neither environment variable is set, return None
         return None

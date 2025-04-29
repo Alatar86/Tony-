@@ -31,8 +31,7 @@ def sync_configs(root_dir):
         # Log signature value BEFORE merge
         root_signature = root_config.get("User", "signature", fallback="<NOT SET>")
         logger.info(
-            f"SYNC: Signature read from ROOT config BEFORE merge: "
-            f"'{root_signature}'",
+            f"SYNC: Signature read from ROOT config BEFORE merge: '{root_signature}'",
         )
     if backend_exists:
         backend_config.read(backend_config_path)

@@ -304,7 +304,7 @@ class LocalLlmService:
             elif in_numbered_list and line:
                 # Continue previous suggestion
                 if current_suggestion:
-                    # Only add a space if the current suggestion 
+                    # Only add a space if the current suggestion
                     # doesn't end with punctuation
                     if current_suggestion and current_suggestion[-1] not in ".,:;!?":
                         current_suggestion += " "
@@ -319,7 +319,7 @@ class LocalLlmService:
             logger.info(f"Found {len(suggestions)} numbered suggestions")
             return suggestions
 
-        # Fallback: If no numbered suggestions, 
+        # Fallback: If no numbered suggestions,
         # try to find any reasonable lines as suggestions
         if not suggestions:
             # Reset and try different approach - look for any reasonable sentence
@@ -404,8 +404,7 @@ class LocalLlmService:
                 for model in models:
                     if model.get("name") == self.model_name:
                         logger.info(
-                            f"Ollama service is available with model "
-                            f"{self.model_name}",
+                            f"Ollama service is available with model {self.model_name}",
                         )
                         return True
 
@@ -512,7 +511,7 @@ Generate exactly 3, numbered suggestions for replying to this email:"""  # noqa:
                 response_data = response.json()
                 raw_response = response_data.get("response", "")
 
-                # Process the response into individual suggestions 
+                # Process the response into individual suggestions
                 # using the existing method
                 suggestions = self._parse_suggestions(raw_response)
 
