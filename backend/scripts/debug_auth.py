@@ -77,9 +77,8 @@ def main():
         # Step 4: Check current auth status
         print("\nChecking current auth status...")
         status = auth_service.check_auth_status()
-        print(
-            f"Current auth status: {'Authenticated' if status else 'Not authenticated'}",
-        )
+        status_str = "Authenticated" if status else "Not authenticated"
+        print(f"Current auth status: {status_str}")
 
         # Step 5: Start auth flow if needed
         if not status:
@@ -89,17 +88,15 @@ def main():
 
             try:
                 success = auth_service.initiate_auth_flow()
-                print(
-                    f"\nAuthentication flow completed: {'Successfully' if success else 'Failed'}",
-                )
+                result_str = "Successfully" if success else "Failed"
+                print(f"\nAuthentication flow completed: {result_str}")
             except Exception as e:
                 print(f"\n✗ Error during authentication: {e}")
 
             # Check status again
             status = auth_service.check_auth_status()
-            print(
-                f"Auth status after flow: {'Authenticated' if status else 'Not authenticated'}",
-            )
+            status_str = "Authenticated" if status else "Not authenticated"
+            print(f"Auth status after flow: {status_str}")
 
     except Exception as e:
         print(f"Error: {e}")

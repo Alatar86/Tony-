@@ -55,7 +55,7 @@ class GmailApiService:
             self._get_service()
         except Exception as e:
             logger.error(f"Failed to initialize Gmail service: {e}")
-            raise GmailApiError(f"Failed to initialize Gmail service: {str(e)}")
+            raise GmailApiError(f"Failed to initialize Gmail service: {str(e)}") from e
 
     def _get_service(self):
         """
@@ -79,30 +79,33 @@ class GmailApiService:
                 self.service = build("gmail", "v1", http=authorized_http)
 
                 logger.info(
-                    f"Gmail API service created successfully with {self.api_timeout}s timeout",
+                    f"Gmail API service created successfully with {self.api_timeout}s timeout",  # noqa: E501
                 )
             return self.service
         except httplib2.HttpLib2Error as e:
             logger.error(f"HTTP client error creating Gmail API service: {e}")
-            raise GmailApiError(f"HTTP client error: {str(e)}")
+            raise GmailApiError(f"HTTP client error: {str(e)}") from e
         except socket.timeout as e:
             logger.error(f"Timeout while creating Gmail API service: {e}")
             raise GmailApiError(
                 f"Timeout while creating Gmail API service: {str(e)}",
                 code=504,
-            )
+            ) from e
         except Exception as e:
             logger.error(f"Failed to create Gmail API service: {e}")
-            raise GmailApiError(f"Failed to create Gmail API service: {str(e)}")
+            raise GmailApiError(f"Failed to create Gmail API service: {str(e)}") from e
 
     def list_messages(self, label_id=None, thread_id=None, max_results=50):
         """
         List messages, optionally filtered by label.
 
         Args:
-            label_id (str, optional): Gmail label ID (e.g., 'INBOX', 'SENT'). Defaults to None.
-            thread_id (str, optional): Thread ID to list messages from. Defaults to None.
-            max_results (int, optional): Maximum number of messages to return. Defaults to 50.
+            label_id (str, optional): Gmail label ID (e.g., 'INBOX', 'SENT').
+                Defaults to None.
+            thread_id (str, optional): Thread ID to list messages from.
+                Defaults to None.
+            max_results (int, optional): Maximum number of messages to return.
+                Defaults to 50.
 
         Returns:
             list: List of message IDs
@@ -150,19 +153,21 @@ class GmailApiService:
             raise GmailApiError(
                 f"Failed to list messages: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except socket.timeout as e:
             logger.error(f"Timeout while listing messages: {e}")
             raise GmailApiError(
                 f"Request to list messages timed out after {self.api_timeout}s",
                 code=504,
-            )
+            ) from e
         except httplib2.HttpLib2Error as e:
-            logger.error(f"HTTP client error listing messages: {e}")
-            raise GmailApiError(f"HTTP client error while listing messages: {str(e)}")
+            logger.error(f"HTTP client error while listing messages: {e}")
+            raise GmailApiError(
+                f"HTTP client error while listing messages: {str(e)}"
+            ) from e
         except Exception as e:
             logger.error(f"Error listing messages: {e}")
-            raise GmailApiError(f"Error listing messages: {str(e)}")
+            raise GmailApiError(f"Error listing messages: {str(e)}") from e
 
     def get_message_metadata(self, message_id):
         """
@@ -218,15 +223,15 @@ class GmailApiService:
         except HttpError as error:
             if error.resp.status == 404:
                 logger.warning(f"Message not found: {message_id}")
-                raise NotFoundError(f"Message not found: {message_id}")
+                raise NotFoundError(f"Message not found: {message_id}") from error
             logger.error(f"HTTP error while getting message metadata: {error}")
             raise GmailApiError(
                 f"Failed to get message metadata: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except Exception as e:
             logger.error(f"Error getting message metadata: {e}")
-            raise GmailApiError(f"Error getting message metadata: {str(e)}")
+            raise GmailApiError(f"Error getting message metadata: {str(e)}") from e
 
     def get_multiple_messages_metadata(self, message_ids: list[str]) -> dict[str, dict]:
         """
@@ -237,7 +242,8 @@ class GmailApiService:
 
         Returns:
             A dictionary where keys are message IDs and values are metadata dicts
-            (containing subject, from, date etc.), or None if metadata fetch failed for that ID.
+            (containing subject, from, date etc.), or None if metadata fetch
+            failed for that ID.
             Returns an empty dict if input list is empty.
         """
         if not message_ids:
@@ -252,11 +258,13 @@ class GmailApiService:
                 # Check if it's an HttpError and potentially log status code
                 if isinstance(exception, HttpError):
                     logger.warning(
-                        f"Error {exception.resp.status} fetching metadata for message ID {request_id} in batch: {exception}",
+                        f"Error {exception.resp.status} fetching metadata for ",
+                        f"message ID {request_id} in batch: {exception}",
                     )
                 else:
                     logger.warning(
-                        f"Error fetching metadata for message ID {request_id} in batch: {exception}",
+                        f"Error fetching metadata for message ID {request_id} "
+                        f"in batch: {exception}",
                     )
                 metadata_results[request_id] = None  # Mark as failed
             else:
@@ -288,13 +296,14 @@ class GmailApiService:
                     }
                 except Exception as parse_error:
                     logger.error(
-                        f"Error parsing metadata for message ID {request_id} in batch callback: {parse_error}",
+                        f"Error parsing metadata for message ID {request_id} "
+                        f"in batch callback: {parse_error}",
                     )
                     metadata_results[request_id] = None  # Mark as failed
 
         try:
             service = self._get_service()  # Get the authorized service object
-            # Use the service's method to create a batch request correctly associated with Gmail
+            # Create a Gmail batch request for metadata operations
             batch = service.new_batch_http_request(callback=_batch_callback)
 
             logger.info(
@@ -316,7 +325,8 @@ class GmailApiService:
                                 "Date",
                             ],  # Explicitly request headers needed
                         ),
-                        request_id=msg_id,  # Use message_id as request_id for easy mapping in callback
+                        # Use message_id as request_id for callback mapping
+                        request_id=msg_id,
                     )
                 else:
                     logger.warning(
@@ -324,11 +334,16 @@ class GmailApiService:
                     )
 
             # Execute the batch request.
-            # The new_batch_http_request method ensures the correct http object and batch path are used.
+            # The new_batch_http_request ensures correct http and batch path
             batch.execute()
 
+            processed = len(metadata_results)
+            successful = len([v for v in metadata_results.values() if v])
             logger.info(
-                f"Batch request executed. Processed {len(metadata_results)} results (Success/Fail). Returning {len([v for v in metadata_results.values() if v])} successful fetches.",
+                "Batch request executed. Processed %s results. "
+                "Returning %s successful.",
+                processed,
+                successful,
             )
             return metadata_results
 
@@ -341,16 +356,18 @@ class GmailApiService:
             raise GmailApiError(
                 f"Batch request failed: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except socket.timeout as e:
             logger.error(f"Timeout during batch metadata fetch execution: {e}")
             raise GmailApiError(
                 f"Batch request timed out after {self.api_timeout}s",
                 code=504,
-            )
+            ) from e
         except httplib2.HttpLib2Error as e:
             logger.error(f"HTTP client error during batch request: {e}")
-            raise GmailApiError(f"HTTP client error during batch request: {str(e)}")
+            raise GmailApiError(
+                f"HTTP client error during batch request: {str(e)}"
+            ) from e
         except Exception as e:
             logger.error(
                 f"Unexpected error during batch metadata fetch execution: {e}",
@@ -361,7 +378,7 @@ class GmailApiService:
             # Option 2: Raise an exception (current choice)
             raise GmailApiError(
                 f"Batch request failed due to unexpected error: {str(e)}",
-            )
+            ) from e
 
     def get_message_details(self, message_id):
         """
@@ -417,7 +434,8 @@ class GmailApiService:
                 "to": headers.get("To", "(Unknown recipient)"),
                 "date": headers.get("Date", "(Unknown date)"),
                 "body": body_text,
-                "is_html": is_html,  # Add flag indicating if content was originally HTML
+                # Flag indicating if content was originally HTML
+                "is_html": is_html,
                 "thread_id": message.get("threadId", ""),
                 "message_id": message_id_header,
                 "references": references,
@@ -429,26 +447,26 @@ class GmailApiService:
         except HttpError as error:
             if error.resp.status == 404:
                 logger.warning(f"Message not found: {message_id}")
-                raise NotFoundError(f"Message not found: {message_id}")
+                raise NotFoundError(f"Message not found: {message_id}") from error
             logger.error(f"HTTP error while getting message details: {error}")
             raise GmailApiError(
                 f"Failed to get message details: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except socket.timeout as e:
             logger.error(f"Timeout while getting message details: {e}")
             raise GmailApiError(
                 f"Request to get message details timed out after {self.api_timeout}s",
                 code=504,
-            )
+            ) from e
         except httplib2.HttpLib2Error as e:
             logger.error(f"HTTP client error getting message details: {e}")
             raise GmailApiError(
-                f"HTTP client error while getting message details: {str(e)}",
-            )
+                f"HTTP client error while getting message details: {str(e)}"
+            ) from e
         except Exception as e:
             logger.error(f"Error getting message details: {e}")
-            raise GmailApiError(f"Error getting message details: {str(e)}")
+            raise GmailApiError(f"Error getting message details: {str(e)}") from e
 
     def archive_message(self, message_id):
         """
@@ -495,15 +513,15 @@ class GmailApiService:
         except HttpError as error:
             if error.resp.status == 404:
                 logger.warning(f"Message not found: {message_id}")
-                raise NotFoundError(f"Message not found: {message_id}")
+                raise NotFoundError(f"Message not found: {message_id}") from error
             logger.error(f"HTTP error while archiving message: {error}")
             raise GmailApiError(
                 f"Failed to archive message: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except Exception as e:
             logger.error(f"Error archiving message: {e}")
-            raise GmailApiError(f"Error archiving message: {str(e)}")
+            raise GmailApiError(f"Error archiving message: {str(e)}") from e
 
     def delete_message(self, message_id):
         """
@@ -542,15 +560,15 @@ class GmailApiService:
         except HttpError as error:
             if error.resp.status == 404:
                 logger.warning(f"Message not found: {message_id}")
-                raise NotFoundError(f"Message not found: {message_id}")
+                raise NotFoundError(f"Message not found: {message_id}") from error
             logger.error(f"HTTP error while deleting message: {error}")
             raise GmailApiError(
                 f"Failed to delete message: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except Exception as e:
             logger.error(f"Error deleting message: {e}")
-            raise GmailApiError(f"Error deleting message: {str(e)}")
+            raise GmailApiError(f"Error deleting message: {str(e)}") from e
 
     def send_email(self, to, subject, body, reply_to=None):
         """
@@ -600,10 +618,11 @@ class GmailApiService:
                     # Get the original message details to extract necessary headers
                     original = self.get_message_details(reply_to)
                     if original:
-                        # Set up the References header properly
+                        # Add References from original message to
+                        # keep the thread
                         references = []
 
-                        # First, add any References from the original message to maintain the thread
+                        # First, add original message References for threading
                         if original.get("references"):
                             references.extend(
                                 [
@@ -630,14 +649,13 @@ class GmailApiService:
                                 message["In-Reply-To"] = original_message_id
 
                         else:
-                            # Fallback: Use Gmail ID if no Message-ID or References were found
+                            # Fallback: use Gmail ID if no Message-ID/References found
                             fallback_id = f"<{reply_to}@mail.gmail.com>"
                             message["References"] = fallback_id
                             message["In-Reply-To"] = fallback_id
 
-                        # Set From address based on user identity (if available)
-                        # Note: Normally, you would get this from credentials or user profile
-                        # For now, just handle headers consistently
+                        # Normally sourced from credentials/user profile.
+                        # Here we simply keep headers consistent.
 
                 except Exception as e:
                     logger.warning(f"Could not set up proper reply headers: {e}")
@@ -682,22 +700,24 @@ class GmailApiService:
             raise GmailApiError(
                 f"Failed to send email: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except socket.timeout as e:
             logger.error(f"Timeout while sending email: {e}")
             raise GmailApiError(
                 f"Request to send email timed out after {self.api_timeout}s",
                 code=504,
-            )
+            ) from e
         except httplib2.HttpLib2Error as e:
-            logger.error(f"HTTP client error sending email: {e}")
-            raise GmailApiError(f"HTTP client error while sending email: {str(e)}")
+            logger.error(f"HTTP client error while sending email: {e}")
+            raise GmailApiError(
+                f"HTTP client error while sending email: {str(e)}"
+            ) from e
         except ValidationError:
             # Re-raise validation errors
             raise
         except Exception as e:
             logger.error(f"Error sending email: {e}")
-            raise GmailApiError(f"Error sending email: {str(e)}")
+            raise GmailApiError(f"Error sending email: {str(e)}") from e
 
     def _get_body_text(self, payload, depth=0, max_depth=10):
         """
@@ -717,7 +737,8 @@ class GmailApiService:
         # Guard against excessive recursion
         if depth > max_depth:
             logger.warning(
-                f"Maximum recursion depth reached ({max_depth}) while parsing email body",
+                "Maximum recursion depth reached (%s) while parsing email body",
+                max_depth,
             )
             return "(Email structure too complex to parse)", False
 
@@ -734,7 +755,7 @@ class GmailApiService:
                 plain_text = body_data
             elif mime_type == "text/html":
                 html_text = body_data
-            # Fallback: if we can't determine the type but have content, assume plain text
+            # Fallback: unknown type with content => assume plain text
             elif body_data:
                 plain_text = body_data
 
@@ -825,7 +846,8 @@ class GmailApiService:
             "SPAM": "SPAM",
             "TRASH": "TRASH",
             "CATEGORY_WORK": "CATEGORY_WORK",  # Gmail category for work-related emails
-            "CATEGORY_PERSONAL": "CATEGORY_PERSONAL",  # Gmail category for personal emails
+            # Gmail category for personal emails
+            "CATEGORY_PERSONAL": "CATEGORY_PERSONAL",
             # Add any other needed mappings here
         }
 
@@ -944,12 +966,12 @@ class GmailApiService:
         except HttpError as error:
             if error.resp.status == 404:
                 logger.warning(f"Message not found: {message_id}")
-                raise NotFoundError(f"Message not found: {message_id}")
+                raise NotFoundError(f"Message not found: {message_id}") from error
             logger.error(f"HTTP error while modifying message labels: {error}")
             raise GmailApiError(
                 f"Failed to modify message labels: {str(error)}",
                 code=error.resp.status,
-            )
+            ) from error
         except Exception as e:
             logger.error(f"Error modifying message labels: {e}")
-            raise GmailApiError(f"Error modifying message labels: {str(e)}")
+            raise GmailApiError(f"Error modifying message labels: {str(e)}") from e

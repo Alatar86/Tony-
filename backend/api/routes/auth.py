@@ -42,7 +42,7 @@ def auth_login():
         # Log the exception within the route
         logger.exception("Error during authentication")
         # Raise specific error for the handler in api_server.py
-        raise AuthError(f"Error during authentication: {str(e)}")
+        raise AuthError(f"Error during authentication: {str(e)}") from e
 
 
 # TODO: Move auth routes here

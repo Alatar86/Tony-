@@ -35,7 +35,8 @@ def get_config():
             # Check if section exists
             if not config_manager.config.has_section(section):
                 logger.warning(
-                    f"Config section [{section}] not found during GET /config. Skipping.",
+                    f"Config section [{section}] not found during GET /config. "
+                    f"Skipping.",
                 )
                 config_values[section] = {}  # Still return the section key, but empty
                 continue
@@ -62,16 +63,20 @@ def get_config():
                 except (configparser.NoOptionError, configparser.NoSectionError) as e:
                     # Log if a specific key is missing within an existing section
                     logger.warning(
-                        f"Config key [{section}] {key} not found during GET /config: {e}. Setting to default/null.",
+                        f"Config key [{section}] {key} not found during GET /config: "
+                        f"{e}. Setting to default/null.",
                     )
-                    # Decide on a default value (e.g., None, empty string, or specific default)
+                    # Decide on a default value
+                    # (None, empty string, or specific default)
                     config_values[section][key] = (
                         None  # Or use "" or a default value like for max_emails_fetch
                     )
                 except ValueError as e:
-                    # Handle cases where getint/getboolean fails due to wrong type in file
+                    # Handle cases where getint/getboolean fails
+                    # due to wrong type in file
                     logger.error(
-                        f"Config key [{section}] {key} has invalid format: {e}. Setting to default/null.",
+                        f"Config key [{section}] {key} has invalid format: {e}. "
+                        f"Setting to default/null.",
                     )
                     config_values[section][key] = None  # Or default
 
@@ -79,7 +84,7 @@ def get_config():
 
     except Exception as e:
         logger.exception("Error fetching configuration")
-        raise ServiceError(f"Error fetching configuration: {str(e)}", 500)
+        raise ServiceError(f"Error fetching configuration: {str(e)}", 500) from e
 
 
 @config_bp.route("", methods=["POST"])
@@ -176,10 +181,10 @@ def update_config():
             if ollama_updated:
                 # Ideally, trigger re-init via a signal or callback
                 logger.info(
-                    "Ollama config updated. Related services may need re-initialization.",
+                    "Ollama config updated. Related services may need re-initialization.",  # noqa: E501
                 )
-                # Re-initialization logic removed from here, needs to be handled centrally.
-                # current_app.config['SERVICES']['llm_service'] = LocalLlmService(config_manager)
+                # Re-initialization logic removed from here, needs to be handled centrally.  # noqa: E501
+                # current_app.config['SERVICES']['llm_service'] = LocalLlmService(config_manager)  # noqa: E501
 
         return jsonify(
             {"success": True, "message": "Configuration updated successfully."},
@@ -190,7 +195,7 @@ def update_config():
     except Exception as e:
         logger.exception("Error updating configuration")
         # Use a specific error type if available, e.g., ConfigError
-        raise ServiceError(f"Error updating configuration: {str(e)}", 500)
+        raise ServiceError(f"Error updating configuration: {str(e)}", 500) from e
 
 
 @config_bp.route("/signature", methods=["POST"])
@@ -224,4 +229,4 @@ def update_signature():
         raise  # Let the error handler catch validation errors
     except Exception as e:
         logger.exception("Error updating signature")
-        raise ServiceError(f"Error updating signature: {str(e)}", 500)
+        raise ServiceError(f"Error updating signature: {str(e)}", 500) from e

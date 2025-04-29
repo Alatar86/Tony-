@@ -111,7 +111,7 @@ class ApiServer:
                 )
             except Exception as e:
                 logger.exception("Error during authentication")
-                raise AuthError(f"Error during authentication: {str(e)}")
+                raise AuthError(f"Error during authentication: {str(e)}") from e
 
         # Configuration endpoints
         @self.app.route("/config", methods=["GET"])
@@ -135,7 +135,8 @@ class ApiServer:
 
                     config_values[section] = {}
                     for key in keys:
-                        # Use appropriate getter based on expected type (optional, but good practice)
+                        # Use appropriate getter based on expected type
+                        # (optional, but good practice)
                         if key == "max_emails_fetch":
                             value = self.config_manager.getint(
                                 section,
@@ -151,7 +152,9 @@ class ApiServer:
             except Exception as e:
                 logger.exception("Error fetching configuration")
                 # Use a specific error type if available, e.g., ConfigError
-                raise ServiceError(f"Error fetching configuration: {str(e)}", 500)
+                raise ServiceError(
+                    f"Error fetching configuration: {str(e)}", 500
+                ) from e
 
         @self.app.route("/config", methods=["POST"])
         def update_config():
@@ -257,7 +260,9 @@ class ApiServer:
             except Exception as e:
                 logger.exception("Error updating configuration")
                 # Use a specific error type if available, e.g., ConfigError
-                raise ServiceError(f"Error updating configuration: {str(e)}", 500)
+                raise ServiceError(
+                    f"Error updating configuration: {str(e)}", 500
+                ) from e
 
         # Email data endpoints
         @self.app.route("/emails", methods=["GET"])
@@ -276,7 +281,8 @@ class ApiServer:
             )
 
             logger.info(
-                f"API request: List emails for labelId='{label_id}', maxResults={max_results}",
+                f"API request: List emails for labelId='{label_id}', "
+                f"maxResults={max_results}",
             )
 
             try:
@@ -307,19 +313,22 @@ class ApiServer:
                     metadata_dict = gmail_service.get_multiple_messages_metadata(
                         message_ids,
                     )
-                    # Filter out any None results (where individual fetches failed) and get list of metadata dicts
+                    # Filter out any None results (where individual fetches failed)
+                    # and get a list of metadata dictionaries
                     emails = [
                         metadata
                         for metadata in metadata_dict.values()
                         if metadata is not None
                     ]
                     logger.info(
-                        f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via batch for labelId: {label_id}",
+                        f"Successfully fetched metadata for {len(emails)} out of "
+                        f"{len(message_ids)} emails via batch for labelId: {label_id}",
                     )
                 else:
                     emails = []  # No IDs found, so no metadata to fetch
                     logger.info(
-                        f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch.",
+                        f"No message IDs found for labelId: {label_id}, skipping "
+                        "batch metadata fetch.",
                     )
 
                 return jsonify(emails)
@@ -329,7 +338,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error listing emails for labelId={label_id}")
-                raise GmailApiError(f"Error listing emails: {str(e)}")
+                raise GmailApiError(f"Error listing emails: {str(e)}") from e
 
         @self.app.route("/emails/<message_id>", methods=["GET"])
         def get_email(message_id):
@@ -356,7 +365,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error getting email {message_id}")
-                raise GmailApiError(f"Error retrieving email: {str(e)}")
+                raise GmailApiError(f"Error retrieving email: {str(e)}") from e
 
         @self.app.route("/emails/<message_id>/suggestions", methods=["GET"])
         def get_suggestions(message_id):
@@ -383,7 +392,8 @@ class ApiServer:
                 if "in_reply_to" in details and details["in_reply_to"]:
                     is_reply = True
                     logger.info(
-                        f"Email {message_id} is a reply - building conversation context",
+                        f"Email {message_id} is a reply - building conversation "
+                        "context",
                     )
 
                     # Get thread ID from the message
@@ -395,8 +405,8 @@ class ApiServer:
                         )
 
                         if thread_messages:
-                            # Sort messages by date (oldest first) to establish conversation order
-                            # We need to get full details for each message in the thread
+                            # Sort messages by date (oldest first) to establish the
+                            # conversation order
                             conversation = []
 
                             for msg_id in thread_messages:
@@ -418,10 +428,14 @@ class ApiServer:
                                             )
                                     except Exception as e:
                                         logger.warning(
-                                            f"Error getting thread message {msg_id}: {e}",
+                                            (
+                                                "Error getting thread message "
+                                                f"{msg_id}: {e}"
+                                            ),
                                         )
 
-                            # Build thread context (limit to 2 previous messages to avoid excessive context)
+                            # Build thread context (limit to 2 previous messages)
+                            # to avoid excessive context
                             if conversation:
                                 # Sort by date
                                 conversation.sort(key=lambda x: x.get("date", ""))
@@ -433,7 +447,8 @@ class ApiServer:
                                     else conversation
                                 )
 
-                                # Get the user's email address for better context identification
+                                # Get the user's email address for better context
+                                # identification
                                 user_email = gmail_service.get_user_email()
 
                                 # Build context string
@@ -447,7 +462,7 @@ class ApiServer:
                                     if len(body) > 500:
                                         body = body[:500] + "... [message truncated]"
 
-                                    # Identify if this message is from the user or the other party
+                                    # Identify if this message is from the user
                                     sender_type = (
                                         "You"
                                         if user_email and user_email in from_part
@@ -462,7 +477,8 @@ class ApiServer:
                                     )
                                     thread_context += f"{body}\n\n"
 
-                                # For the current message, also identify if it's from the user
+                                # For the current message, also identify if it is from
+                                # the user
                                 current_from = details.get("from", "(Unknown)")
                                 sender_type = (
                                     "You"
@@ -489,9 +505,18 @@ class ApiServer:
                         logger.info("User is attempting to reply to their own email")
                         # Provide special suggestions for this case
                         suggestions = [
-                            "Did you mean to add more information to your previous message?",
-                            "I see you're replying to your own message. Did you want to follow up with the recipient?",
-                            "Would you like to send a reminder about this conversation?",
+                            (
+                                "Did you mean to add more information to your previous "
+                                "message?"
+                            ),
+                            (
+                                "I see you're replying to your own message. "
+                                "Did you want to follow up with the recipient?"
+                            ),
+                            (
+                                "Would you like to send a reminder about this "
+                                "conversation?"
+                            ),
                         ]
                     else:
                         # Normal case - get suggestions with context
@@ -513,7 +538,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error getting suggestions for email {message_id}")
-                raise OllamaError(f"Error generating suggestions: {str(e)}")
+                raise OllamaError(f"Error generating suggestions: {str(e)}") from e
 
         @self.app.route("/emails/<message_id>/archive", methods=["POST"])
         def archive_email(message_id):
@@ -546,7 +571,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error archiving email {message_id}")
-                raise GmailApiError(f"Error archiving email: {str(e)}")
+                raise GmailApiError(f"Error archiving email: {str(e)}") from e
 
         @self.app.route("/emails/<message_id>/delete", methods=["DELETE"])
         def delete_email(message_id):
@@ -579,7 +604,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error deleting email {message_id}")
-                raise GmailApiError(f"Error deleting email: {str(e)}")
+                raise GmailApiError(f"Error deleting email: {str(e)}") from e
 
         @self.app.route("/emails/send", methods=["POST"])
         def send_email():
@@ -631,7 +656,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception("Error sending email")
-                raise GmailApiError(f"Error sending email: {str(e)}")
+                raise GmailApiError(f"Error sending email: {str(e)}") from e
 
         @self.app.route("/emails/<message_id>/modify", methods=["POST"])
         def modify_email_labels(message_id):
@@ -681,7 +706,7 @@ class ApiServer:
                 raise
             except Exception as e:
                 logger.exception(f"Error modifying email labels for {message_id}")
-                raise GmailApiError(f"Error modifying email labels: {str(e)}")
+                raise GmailApiError(f"Error modifying email labels: {str(e)}") from e
 
         # Status endpoint
         @self.app.route("/status", methods=["GET"])
@@ -701,7 +726,7 @@ class ApiServer:
                 )
             except Exception as e:
                 logger.exception("Error checking status")
-                raise ServiceError(f"Error checking service status: {str(e)}")
+                raise ServiceError(f"Error checking service status: {str(e)}") from e
 
     def _get_authenticated_gmail_service(self):
         """

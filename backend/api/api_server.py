@@ -68,7 +68,8 @@ class ApiServer:
             "auth_service": self.auth_service,
             "llm_service": self.llm_service,
             "config_manager": self.config_manager,
-            "get_gmail_service": self._get_authenticated_gmail_service,  # Store bound method
+            # Bound method used by blueprints to fetch an authenticated Gmail service
+            "get_gmail_service": self._get_authenticated_gmail_service,
         }
 
         # Register error handlers
@@ -142,7 +143,8 @@ class ApiServer:
             """Handle 405 Method Not Allowed errors"""
             logger.info(f"Method not allowed: {request.method} {request.path}")
             ma_error = ServiceError(
-                f"The method {request.method} is not allowed for the requested URL {request.path}.",
+                f"The method {request.method} is not allowed for the requested URL "
+                f"{request.path}.",
                 code=405,
             )
             return jsonify(ma_error.to_dict()), ma_error.code
@@ -164,8 +166,10 @@ class ApiServer:
     def _get_authenticated_gmail_service(self):
         """
         Get an authenticated Gmail service instance.
-        This method remains here as it depends on self.auth_service and self.config_manager.
-        It's accessed by blueprints via current_app.config['SERVICES']['get_gmail_service']().
+        This method remains here because it depends on self.auth_service and
+        self.config_manager.
+        It's accessed by blueprints via
+        current_app.config['SERVICES']['get_gmail_service']().
 
         Returns:
             GmailApiService instance or None if authentication fails
@@ -177,11 +181,13 @@ class ApiServer:
                 logger.error("Failed to get valid credentials")
                 return None
 
-            # Create Gmail service if needed - reuse self.gmail_service instance if already created
+            # Create Gmail service if needed — reuse self.gmail_service instance if
+            # it has already been created.
             # This provides a basic singleton-like behavior per ApiServer instance.
-            # If the credentials changed, this logic doesn't automatically recreate the service,
-            # but get_credentials() should handle token refresh internally.
-            # TODO: Review if credential changes require explicit recreation of GmailApiService.
+            # If the credentials changed, this logic doesn't automatically recreate the
+            # service, but get_credentials() should handle token refresh internally.
+            # TODO: Review if credential changes require explicit recreation of
+            # GmailApiService.
             if not self.gmail_service or self.gmail_service.credentials != credentials:
                 logger.info("Creating/Updating GmailApiService instance.")
                 self.gmail_service = GmailApiService(credentials, self.config_manager)
@@ -201,7 +207,8 @@ class ApiServer:
         logger.info(f"Starting API server on {host}:{port}")
         # Consider using a production-ready WSGI server like gunicorn or waitress
         # instead of self.app.run() for production deployments.
-        # For development, debug=False is usually appropriate for API servers unless actively debugging Flask itself.
+        # For development, debug=False is usually appropriate for API servers unless
+        # actively debugging Flask itself.
         self.app.run(host=host, port=port, debug=False)
 
 

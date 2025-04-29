@@ -43,7 +43,9 @@ class TestGoogleAuthService(unittest.TestCase):
     @patch.dict(
         os.environ,
         {
-            "GOOGLE_CLIENT_SECRET_JSON_CONTENT": '{"web": {"client_id": "test_id", "client_secret": "test_secret"}}',
+            "GOOGLE_CLIENT_SECRET_JSON_CONTENT": (
+                '{"web": {"client_id": "test_id", "client_secret": "test_secret"}}'
+            ),
         },
     )
     def test_load_client_secrets_from_env_content(self):
@@ -63,14 +65,18 @@ class TestGoogleAuthService(unittest.TestCase):
         with self.assertRaises(ConfigError):
             self.service._load_client_secrets_from_env()
 
-    @patch.dict(os.environ, {"GOOGLE_CLIENT_SECRET_JSON_PATH": "/path/to/secrets.json"})
+    @patch.dict(
+        os.environ, 
+        {"GOOGLE_CLIENT_SECRET_JSON_PATH": "/path/to/secrets.json"}
+    )
     @patch(
         "builtins.open",
         new_callable=mock_open,
         read_data='{"web": {"client_id": "file_id", "client_secret": "file_secret"}}',
     )
     def test_load_client_secrets_from_env_path(self, mock_file):
-        """Test loading client secrets from a file path specified in environment variable"""
+        """Test loading client secrets from a file path specified in 
+        environment variable"""
         # Call the method under test
         result = self.service._load_client_secrets_from_env()
 

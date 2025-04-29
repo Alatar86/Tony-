@@ -1,8 +1,4 @@
 [tool.ruff]
-# Enable flake8-bugbear (`B`) rules.
-select = ["E", "F", "W", "I", "B", "COM", "C4"]
-ignore = []
-
 # Same as Black.
 line-length = 88
 indent-width = 4
@@ -30,7 +26,12 @@ indent-style = "space"
 # Use parentheses for line continuation on binary operators
 line-ending = "auto"
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+# Enable flake8-bugbear (`B`) rules.
+select = ["E", "F", "W", "I", "B", "COM", "C4"]
+ignore = ["COM812"]
+
+[tool.ruff.lint.isort]
 known-first-party = ["backend"]
 
 [tool.ruff.lint.pydocstyle]

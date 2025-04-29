@@ -64,14 +64,16 @@ class LocalLlmService:
             logger.info(f"LocalLlmService initialized with model: {self.model_name}")
             logger.info(f"Ollama API URL: {self.api_base_url}")
             logger.info(
-                f"Request timeout: {self.request_timeout}s, Status timeout: {self.status_timeout}s",
+                f"Request timeout: {self.request_timeout}s, "
+                f"Status timeout: {self.status_timeout}s",
             )
             logger.info(
-                f"Retry settings: max_retries={self.max_retries}, retry_delay={self.retry_delay}s",
+                f"Retry settings: max_retries={self.max_retries}, "
+                f"retry_delay={self.retry_delay}s",
             )
         except Exception as e:
             logger.error(f"Error initializing LocalLlmService: {e}")
-            raise ConfigError(f"Failed to initialize LocalLlmService: {str(e)}")
+            raise ConfigError(f"Failed to initialize LocalLlmService: {str(e)}") from e
 
     def get_suggestions(self, email_body):
         """
@@ -95,7 +97,8 @@ class LocalLlmService:
         truncated_body = self._truncate_email(email_body)
         if truncated_body != email_body:
             logger.info(
-                f"Email body truncated from {len(email_body)} to {len(truncated_body)} characters",
+                f"Email body truncated from {len(email_body)} to "
+                f"{len(truncated_body)} characters",
             )
 
         # Format the prompt with the email body
@@ -104,7 +107,7 @@ class LocalLlmService:
         for attempt in range(1, self.max_retries + 1):
             try:
                 logger.debug(
-                    f"Sending request to Ollama (attempt {attempt}/{self.max_retries})",
+                    f"Sending request to Ollama (attempt {attempt}/{self.max_retries})",  # noqa: E501
                 )
 
                 # Prepare request to Ollama API
@@ -137,7 +140,8 @@ class LocalLlmService:
                 if not suggestions:
                     if attempt < self.max_retries:
                         logger.warning(
-                            f"Ollama returned no valid suggestions (attempt {attempt}/{self.max_retries}). Retrying...",
+                            f"Ollama returned no valid suggestions "
+                            f"(attempt {attempt}/{self.max_retries}). Retrying...",
                         )
                         time.sleep(self.retry_delay)
                         continue
@@ -156,12 +160,13 @@ class LocalLlmService:
                 logger.info(f"Generated {len(suggestions)} suggestions")
                 return suggestions
 
-            except requests.exceptions.ConnectionError:
+            except requests.exceptions.ConnectionError as e:
                 error_msg = "Ollama service not reachable. Make sure Ollama is running."
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
@@ -169,52 +174,56 @@ class LocalLlmService:
                     error_msg,
                     code=503,
                     details={"service_url": self.api_base_url},
-                )
-            except requests.exceptions.Timeout:
+                ) from e
+            except requests.exceptions.Timeout as e:
                 error_msg = (
                     f"Request to Ollama timed out after {self.request_timeout} seconds"
                 )
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(error_msg, code=504)
+                raise OllamaError(error_msg, code=504) from e
             except requests.exceptions.HTTPError as e:
                 error_msg = f"HTTP error from Ollama API: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
                 raise OllamaError(
                     f"Ollama API returned an error: {str(e)}",
                     code=e.response.status_code if hasattr(e, "response") else 500,
-                )
+                ) from e
             except requests.exceptions.RequestException as e:
                 error_msg = f"Request error while calling Ollama API: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(f"Error communicating with Ollama: {str(e)}")
+                raise OllamaError(f"Error communicating with Ollama: {str(e)}") from e
             except Exception as e:
                 error_msg = f"Error generating suggestions: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(error_msg)
+                raise OllamaError(error_msg) from e
 
         # This should never be reached as we always either return or raise in the loop
         raise OllamaError(
@@ -295,7 +304,8 @@ class LocalLlmService:
             elif in_numbered_list and line:
                 # Continue previous suggestion
                 if current_suggestion:
-                    # Only add a space if the current suggestion doesn't end with punctuation
+                    # Only add a space if the current suggestion 
+                    # doesn't end with punctuation
                     if current_suggestion and current_suggestion[-1] not in ".,:;!?":
                         current_suggestion += " "
                     current_suggestion += line
@@ -309,7 +319,8 @@ class LocalLlmService:
             logger.info(f"Found {len(suggestions)} numbered suggestions")
             return suggestions
 
-        # Fallback: If no numbered suggestions, try to find any reasonable lines as suggestions
+        # Fallback: If no numbered suggestions, 
+        # try to find any reasonable lines as suggestions
         if not suggestions:
             # Reset and try different approach - look for any reasonable sentence
             suggestions = []
@@ -393,12 +404,14 @@ class LocalLlmService:
                 for model in models:
                     if model.get("name") == self.model_name:
                         logger.info(
-                            f"Ollama service is available with model {self.model_name}",
+                            f"Ollama service is available with model "
+                            f"{self.model_name}",
                         )
                         return True
 
                 logger.warning(
-                    f"Ollama service is available but model {self.model_name} not found",
+                    f"Ollama service is available but model "
+                    f"{self.model_name} not found",
                 )
                 return False
             else:
@@ -445,18 +458,25 @@ class LocalLlmService:
             raise OllamaError("Email body must be non-empty string", code=400)
 
         # Prepare the prompt for conversation context
-        reply_prompt_template = """System: You are a helpful assistant providing professional email reply suggestions. You are given a conversation thread and need to generate appropriate reply suggestions for the latest email.
+        # Long template as a single string with noqa comments
+        reply_prompt_template = """System: You are a helpful assistant providing professional email reply suggestions. You are given a conversation thread and need to generate appropriate reply suggestions for the latest email."""  # noqa: E501
+
+        reply_prompt_template += """
 
 CONVERSATION CONTEXT:
 {thread_context}
 
-IMPORTANT: Pay careful attention to who sent each message in the thread. If the message marked as "Current Email" has "You" as the sender, then you are generating suggestions for replying to yourself, which would be unusual. In that case, provide suggestions that acknowledge this fact, such as adding more information to your previous email or following up with the other person.
+IMPORTANT: Pay careful attention to who sent each message in the thread. If the message marked as "Current Email" has "You" as the sender, then you are generating suggestions for replying to yourself, which would be unusual. In that case, provide suggestions that acknowledge this fact, such as adding more information to your previous email or following up with the other person."""  # noqa: E501
 
-Based on this conversation thread, generate exactly 3 short, concise reply suggestions. Format each suggestion as a numbered list (1., 2., 3.) with each suggestion on its own line. Keep each suggestion under 20 words and make them natural, conversational responses that make sense given the full context of who sent each message.
+        reply_prompt_template += """
+
+Based on this conversation thread, generate exactly 3 short, concise reply suggestions. Format each suggestion as a numbered list (1., 2., 3.) with each suggestion on its own line. Keep each suggestion under 20 words and make them natural, conversational responses that make sense given the full context of who sent each message."""  # noqa: E501
+
+        reply_prompt_template += """
 
 Your suggestions must be appropriate for the current conversational state and reflect a logical next message that the user would send.
 
-Generate exactly 3, numbered suggestions for replying to this email:"""
+Generate exactly 3, numbered suggestions for replying to this email:"""  # noqa: E501
 
         # Format the prompt with the conversation context
         prompt = reply_prompt_template.format(thread_context=thread_context)
@@ -465,7 +485,8 @@ Generate exactly 3, numbered suggestions for replying to this email:"""
         for attempt in range(1, self.max_retries + 1):
             try:
                 logger.debug(
-                    f"Sending context-aware request to Ollama (attempt {attempt}/{self.max_retries})",
+                    f"Sending context-aware request to Ollama "
+                    f"(attempt {attempt}/{self.max_retries})",
                 )
 
                 # Prepare request to Ollama API
@@ -491,27 +512,31 @@ Generate exactly 3, numbered suggestions for replying to this email:"""
                 response_data = response.json()
                 raw_response = response_data.get("response", "")
 
-                # Process the response into individual suggestions using the existing method
+                # Process the response into individual suggestions 
+                # using the existing method
                 suggestions = self._parse_suggestions(raw_response)
 
                 # Validate suggestions
                 if not suggestions:
                     if attempt < self.max_retries:
                         logger.warning(
-                            f"Ollama returned no valid suggestions with thread context (attempt {attempt}/{self.max_retries}). Retrying...",
+                            f"Ollama returned no valid suggestions with thread context "
+                            f"(attempt {attempt}/{self.max_retries}). Retrying...",
                         )
                         time.sleep(self.retry_delay)
                         continue
                     else:
                         raise OllamaError(
-                            "Ollama returned empty or unparsable response for thread context",
+                            "Ollama returned empty or unparsable response "
+                            "for thread context",
                         )
 
                 # If we got valid suggestions, ensure we have at least one
                 if len(suggestions) == 0:
                     suggestions = ["I'll look into this and respond shortly."]
                     logger.warning(
-                        "No valid suggestions extracted from thread context, using fallback suggestion",
+                        "No valid suggestions extracted from thread context, "
+                        "using fallback suggestion",
                     )
 
                 logger.info(
@@ -519,12 +544,13 @@ Generate exactly 3, numbered suggestions for replying to this email:"""
                 )
                 return suggestions
 
-            except requests.exceptions.ConnectionError:
+            except requests.exceptions.ConnectionError as e:
                 error_msg = "Ollama service not reachable. Make sure Ollama is running."
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
@@ -532,52 +558,56 @@ Generate exactly 3, numbered suggestions for replying to this email:"""
                     error_msg,
                     code=503,
                     details={"service_url": self.api_base_url},
-                )
-            except requests.exceptions.Timeout:
+                ) from e
+            except requests.exceptions.Timeout as e:
                 error_msg = (
                     f"Request to Ollama timed out after {self.request_timeout} seconds"
                 )
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(error_msg, code=504)
+                raise OllamaError(error_msg, code=504) from e
             except requests.exceptions.HTTPError as e:
                 error_msg = f"HTTP error from Ollama API: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
                 raise OllamaError(
                     f"Ollama API returned an error: {str(e)}",
                     code=e.response.status_code if hasattr(e, "response") else 500,
-                )
+                ) from e
             except requests.exceptions.RequestException as e:
                 error_msg = f"Request error while calling Ollama API: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(f"Error communicating with Ollama: {str(e)}")
+                raise OllamaError(f"Error communicating with Ollama: {str(e)}") from e
             except Exception as e:
                 error_msg = f"Error generating suggestions: {e}"
                 logger.error(error_msg)
                 if attempt < self.max_retries:
                     logger.info(
-                        f"Retrying in {self.retry_delay} seconds (attempt {attempt}/{self.max_retries})",
+                        f"Retrying in {self.retry_delay} seconds "
+                        f"(attempt {attempt}/{self.max_retries})",
                     )
                     time.sleep(self.retry_delay)
                     continue
-                raise OllamaError(error_msg)
+                raise OllamaError(error_msg) from e
 
         # This should never be reached as we always either return or raise in the loop
         raise OllamaError(

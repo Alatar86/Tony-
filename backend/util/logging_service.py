@@ -53,7 +53,8 @@ class LoggingService:
         Initialize the LoggingService.
 
         Args:
-            config_manager: ConfigurationManager instance for accessing configuration (optional)
+            config_manager: ConfigurationManager instance for accessing 
+                configuration (optional)
         """
         self.config_manager = config_manager
 
@@ -132,7 +133,8 @@ class LoggingService:
             )
             # Use standard formatter for file logs
             file_format = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+                "%(asctime)s - %(name)s - %(levelname)s - "
+                "%(filename)s:%(lineno)d - %(message)s",
             )
             file_handler.setFormatter(file_format)
             root_logger.addHandler(file_handler)

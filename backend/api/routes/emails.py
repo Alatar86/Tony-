@@ -57,15 +57,16 @@ def list_emails():
 
         emails = []
         if message_ids:
-            # Define a chunk size for metadata fetching to avoid Gmail API rate limits
-            METADATA_BATCH_CHUNK_SIZE = 15  # Tunable chunk size for metadata fetching to avoid rate limits (Reduced from 25)
+            # Chunk size for metadata fetching (Reduced from 25)
+            METADATA_BATCH_CHUNK_SIZE = 15
 
             # Dictionary to store all metadata results
             all_metadata_results = {}
 
             # Process message IDs in chunks to avoid hitting API rate limits
             logger.info(
-                f"Processing {len(message_ids)} IDs in chunks of {METADATA_BATCH_CHUNK_SIZE}...",
+                f"Processing {len(message_ids)} IDs in chunks "
+                f"of {METADATA_BATCH_CHUNK_SIZE}...",
             )
             for i in range(0, len(message_ids), METADATA_BATCH_CHUNK_SIZE):
                 chunk_ids = message_ids[i : i + METADATA_BATCH_CHUNK_SIZE]
@@ -98,11 +99,14 @@ def list_emails():
                 if metadata is not None
             ]
             logger.info(
-                f"Successfully fetched metadata for {len(emails)} out of {len(message_ids)} emails via chunked batch processing for labelId: {label_id}",
+                f"Successfully fetched metadata for {len(emails)} out of "
+                f"{len(message_ids)} emails via chunked batch processing "
+                f"for labelId: {label_id}",
             )
         else:
             logger.info(
-                f"No message IDs found for labelId: {label_id}, skipping batch metadata fetch.",
+                f"No message IDs found for labelId: {label_id}, "
+                f"skipping batch metadata fetch.",
             )
 
         return jsonify(emails)
@@ -111,7 +115,7 @@ def list_emails():
         raise
     except Exception as e:
         logger.exception(f"Error listing emails for labelId={label_id}")
-        raise GmailApiError(f"Error listing emails: {str(e)}")
+        raise GmailApiError(f"Error listing emails: {str(e)}") from e
 
 
 @emails_bp.route("/<message_id>", methods=["GET"])
@@ -138,7 +142,7 @@ def get_email(message_id):
         raise
     except Exception as e:
         logger.exception(f"Error getting email {message_id}")
-        raise GmailApiError(f"Error retrieving email: {str(e)}")
+        raise GmailApiError(f"Error retrieving email: {str(e)}") from e
 
 
 @emails_bp.route("/<message_id>/suggestions", methods=["GET"])
@@ -224,7 +228,11 @@ def get_suggestions(message_id):
                 )
                 suggestions = [
                     "Did you mean to add more information to your previous message?",
-                    "Replying to your own message in a thread. Continue here or reply to the last message from the other party?",
+                    (
+                        "Replying to your own message in a thread. "
+                        "Continue here or reply to "
+                        "the last message from the other party?"
+                    ),
                     "Forward this thread?",
                 ]
             else:
@@ -247,7 +255,7 @@ def get_suggestions(message_id):
         raise
     except Exception as e:
         logger.exception(f"Error getting suggestions for email {message_id}")
-        raise OllamaError(f"Error generating suggestions: {str(e)}")
+        raise OllamaError(f"Error generating suggestions: {str(e)}") from e
 
 
 @emails_bp.route("/<message_id>/archive", methods=["POST"])
@@ -280,7 +288,7 @@ def archive_email(message_id):
         raise
     except Exception as e:
         logger.exception(f"Error archiving email {message_id}")
-        raise GmailApiError(f"Error archiving email: {str(e)}")
+        raise GmailApiError(f"Error archiving email: {str(e)}") from e
 
 
 @emails_bp.route("/<message_id>/delete", methods=["DELETE"])
@@ -313,7 +321,7 @@ def delete_email(message_id):
         raise
     except Exception as e:
         logger.exception(f"Error deleting email {message_id}")
-        raise GmailApiError(f"Error deleting email: {str(e)}")
+        raise GmailApiError(f"Error deleting email: {str(e)}") from e
 
 
 @emails_bp.route("/send", methods=["POST"])
@@ -362,7 +370,7 @@ def send_email():
         raise
     except Exception as e:
         logger.exception("Error sending email")
-        raise GmailApiError(f"Error sending email: {str(e)}")
+        raise GmailApiError(f"Error sending email: {str(e)}") from e
 
 
 @emails_bp.route("/<message_id>/modify", methods=["POST"])
@@ -408,7 +416,8 @@ def modify_email_labels(message_id):
                 raise ValidationError("No action or label modifications specified")
 
             logger.info(
-                f"Modifying labels for {message_id}: add={add_labels}, remove={remove_labels}",
+                f"Modifying labels for {message_id}: "
+                f"add={add_labels}, remove={remove_labels}",
             )
             result = gmail_service.modify_message_labels(
                 message_id,
@@ -423,7 +432,8 @@ def modify_email_labels(message_id):
                     "success": True,
                     "message": "Labels modified successfully",
                     "message_id": message_id,
-                    # Optional: return the modified message resource from result if available
+                    # Optional: return modified message resource from result
+                    # if available
                 },
             )
 
@@ -431,4 +441,4 @@ def modify_email_labels(message_id):
         raise
     except Exception as e:
         logger.exception(f"Error modifying email {message_id}")
-        raise GmailApiError(f"Error modifying email: {str(e)}")
+        raise GmailApiError(f"Error modifying email: {str(e)}") from e

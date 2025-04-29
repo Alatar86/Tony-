@@ -31,7 +31,7 @@ def status():
         )
     except Exception as e:
         logger.exception("Error checking status")
-        raise ServiceError(f"Error checking service status: {str(e)}")
+        raise ServiceError(f"Error checking service status: {str(e)}") from e
 
 
 # TODO: Move status route here

@@ -46,7 +46,9 @@ class GoogleAuthService:
             logger.info(f"Scopes: {self.scopes}")
         except Exception as e:
             logger.error(f"Error initializing GoogleAuthService: {e}")
-            raise ConfigError(f"Failed to initialize GoogleAuthService: {str(e)}")
+            raise ConfigError(
+                f"Failed to initialize GoogleAuthService: {str(e)}"
+            ) from e
 
     def get_credentials(self):
         """
@@ -82,7 +84,7 @@ class GoogleAuthService:
                     )
                 except Exception as e:
                     logger.error(f"Error parsing token data: {e}")
-                    raise AuthError(f"Failed to parse stored token: {str(e)}")
+                    raise AuthError(f"Failed to parse stored token: {str(e)}") from e
 
             # If credentials are expired but we have a refresh token, refresh them
             if (
@@ -101,7 +103,7 @@ class GoogleAuthService:
                     self.credentials = None
                 except Exception as e:
                     logger.error(f"Unexpected error during token refresh: {e}")
-                    raise AuthError(f"Token refresh failed: {str(e)}")
+                    raise AuthError(f"Token refresh failed: {str(e)}") from e
 
             # If no valid credentials exist, run the OAuth flow
             if not self.credentials or not self.credentials.valid:
@@ -115,7 +117,7 @@ class GoogleAuthService:
             raise
         except Exception as e:
             logger.error(f"Authentication failed: {e}")
-            raise AuthError(f"Authentication failed: {str(e)}")
+            raise AuthError(f"Authentication failed: {str(e)}") from e
 
     def initiate_auth_flow(self):
         """
@@ -136,7 +138,7 @@ class GoogleAuthService:
             raise
         except Exception as e:
             logger.error(f"OAuth flow failed: {e}")
-            raise AuthError(f"OAuth flow failed: {str(e)}")
+            raise AuthError(f"OAuth flow failed: {str(e)}") from e
 
     def check_auth_status(self):
         """
@@ -175,17 +177,20 @@ class GoogleAuthService:
             else:
                 # Fall back to package resources if environment variables not set
                 logger.warning(
-                    "Environment variables for client secrets not found, falling back to package resources",
+                    "Environment variables for client secrets not found, "
+                    "falling back to package resources",
                 )
                 try:
-                    # Python 3.9+ way: traverses(<package>).joinpath(<resource>).open(<mode>)
+                    # Python 3.9+ way: 
+                    # traverses(<package>).joinpath(<resource>).open(<mode>)
                     resource_path = importlib.resources.files(
                         "backend.resources",
                     ).joinpath("client_secret.json")
 
                     with resource_path.open("r") as client_secrets_stream:
                         logger.info(
-                            "Loading client secrets from package resource: backend/resources/client_secret.json",
+                            "Loading client secrets from package resource: "
+                            "backend/resources/client_secret.json",
                         )
                         client_secrets_config = json.load(client_secrets_stream)
                         flow = InstalledAppFlow.from_client_config(
@@ -193,14 +198,15 @@ class GoogleAuthService:
                             self.scopes,
                             redirect_uri="http://localhost:0/oauth2callback",
                         )
-                except FileNotFoundError:
-                    error_msg = "Bundled client_secret.json resource not found in backend.resources package."
+                except FileNotFoundError as e:
+                    error_msg = ("Bundled client_secret.json resource not found in "
+                                "backend.resources package.")
                     logger.error(error_msg)
-                    raise ConfigError(error_msg)
+                    raise ConfigError(error_msg) from e
                 except Exception as e:
                     error_msg = f"Error loading/parsing bundled client_secret.json: {e}"
                     logger.error(error_msg)
-                    raise ConfigError(error_msg)
+                    raise ConfigError(error_msg) from e
 
             # Configure the flow with custom parameters
             flow.oauth2session.redirect_uri = "http://localhost:0/oauth2callback"
@@ -252,9 +258,13 @@ class GoogleAuthService:
                 <div class="container">
                     <div class="success-icon">✓</div>
                     <h1>Authentication Successful!</h1>
-                    <p class="message">You have successfully authenticated with Google.</p>
+                    <p class="message">
+                        You have successfully authenticated with Google.
+                    </p>
                     <p>You can now close this window and return to the application.</p>
-                    <button class="close-button" onclick="window.close()">Close Window</button>
+                    <button class="close-button" onclick="window.close()">
+                        Close Window
+                    </button>
                     <script>
                         // Auto-close after 5 seconds
                         setTimeout(function() {
@@ -269,10 +279,13 @@ class GoogleAuthService:
             # Run the flow with the custom success message
             self.credentials = flow.run_local_server(
                 port=0,  # Use any available port
-                prompt="consent",  # Always ask for consent to ensure we get refresh tokens
+                # Always ask for consent to ensure we get refresh tokens
+                prompt="consent",  
                 success_message=success_message,
                 open_browser=True,
-                authorization_prompt_message="Please authorize the application in your browser",
+                authorization_prompt_message=(
+                    "Please authorize the application in your browser"
+                ),
                 timeout_seconds=120,  # 2 minute timeout for the whole flow
             )
 
@@ -291,8 +304,8 @@ class GoogleAuthService:
                 f"Unhandled exception during OAuth flow: {e}",
             )  # Use logger.exception to include stack trace
             raise AuthError(
-                f"An unexpected error occurred during the OAuth flow: {str(e)}",
-            )
+                f"An unexpected error occurred during OAuth flow: {str(e)}",
+            ) from e
 
     def _load_client_secrets_from_env(self):
         """
@@ -314,31 +327,38 @@ class GoogleAuthService:
                 )
                 return json.loads(json_content)
             except json.JSONDecodeError as e:
-                logger.error(f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}")
+                logger.error(
+                    f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}"
+                )
                 raise ConfigError(
                     f"Invalid JSON in GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}",
-                )
+                ) from e
 
         # Try to load from file path specified in environment variable
         json_path = os.environ.get("GOOGLE_CLIENT_SECRET_JSON_PATH")
         if json_path:
             try:
                 logger.info(
-                    f"Loading client secrets from path in GOOGLE_CLIENT_SECRET_JSON_PATH: {json_path}",
+                    "Loading client secrets from path in "
+                    f"GOOGLE_CLIENT_SECRET_JSON_PATH: {json_path}",
                 )
                 with open(json_path, "r") as f:
                     return json.load(f)
-            except FileNotFoundError:
+            except FileNotFoundError as e:
                 logger.error(f"Client secrets file not found at path: {json_path}")
-                raise ConfigError(f"Client secrets file not found at path: {json_path}")
+                raise ConfigError(
+                    f"Client secrets file not found at path: {json_path}"
+                ) from e
             except json.JSONDecodeError as e:
                 logger.error(f"Error parsing client secrets file at {json_path}: {e}")
                 raise ConfigError(
                     f"Invalid JSON in client secrets file at {json_path}: {e}",
-                )
+                ) from e
             except Exception as e:
                 logger.error(f"Error reading client secrets file at {json_path}: {e}")
-                raise ConfigError(f"Error reading client secrets file: {e}")
+                raise ConfigError(
+                    f"Error reading client secrets file: {e}"
+                ) from e
 
         # If neither environment variable is set, return None
         return None
