@@ -4,52 +4,71 @@ This module provides the core functionality for running the backend server.
 """
 
 import logging
+import os
+import signal
+import sys
+from logging.handlers import RotatingFileHandler
+from types import FrameType
+from typing import Optional
+
+from flask import Flask
 
 from backend.api.api_server import ApiServer
+from backend.util.config_manager import ConfigurationManager
+from backend.util.logging_service import LoggingService
 
-# Configure logging
-logger = logging.getLogger(__name__)
+# Setup signal handling
+def setup_signal_handlers() -> None:
+    """Sets up signal handlers for graceful shutdown."""
+    def handle_signal(signum: int, frame: Optional[FrameType]) -> None:
+        logging.info(f"Received signal {signum}. Shutting down gracefully.")
+        # Perform any necessary cleanup here
+        sys.exit(0)
 
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
 
-def init_logging():
-    """Initialize logging configuration"""
-    try:
-        from backend.util.logging_service import LoggingService
+# Function to run the server
+def run_server(app: Flask) -> None:
+    """
+    Runs the Flask server with settings from the config.
+    Handles different environments (development, production).
+    """
+    config = ConfigurationManager.get_instance()
+    host = config.get('API', 'host', fallback='127.0.0.1')
+    port = config.getint('API', 'port', fallback=5000)
+    
+    # Get debug mode configuration and convert to boolean
+    debug_mode_str = config.get('development', 'debug_mode', fallback='false')
+    debug = (debug_mode_str.lower() if debug_mode_str else 'false') in ('true', '1', 't')
 
-        # Initialize the LoggingService without config_manager
-        # It will use environment variables for configuration
-        LoggingService()
-    except ImportError:
-        # Fall back to basic configuration if LoggingService is not available
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
-        logging.warning(
-            "Could not import LoggingService, using basic logging configuration",
-        )
+    # The reloader should be disabled if running in a production environment
+    # or if managed by an external tool like Gunicorn.
+    use_reloader = debug 
 
+    app.run(host=host, port=port, debug=debug, use_reloader=use_reloader)
 
-def run_server():
-    """Initialize and run the API server"""
-    try:
-        logger.info("Starting Privacy-Focused Email Agent Backend")
+# Main entry point
+def main() -> None:
+    """
+    Main function to initialize and run the application.
+    """
+    # Initialize configuration
+    config = ConfigurationManager.get_instance()
+    
+    # Initialize logging service
+    logging_service = LoggingService(config)
 
-        # Initialize and run the API server
-        server = ApiServer()
-        server.run()
+    logging.info("Starting the Flask application.")
+    
+    # Setup signal handlers for graceful shutdown
+    setup_signal_handlers()
 
-        return 0
-    except Exception:
-        logger.exception("Error starting application")
-        return 1
+    # Create API server instance
+    api_server = ApiServer()
 
+    # Run the server
+    run_server(api_server.app)
 
-def main():
-    """Main entry point when running directly from the backend directory"""
-    init_logging()
-    return run_server()
-
-
-if __name__ == "__main__":
-    exit(main())
+if __name__ == '__main__':
+    main()

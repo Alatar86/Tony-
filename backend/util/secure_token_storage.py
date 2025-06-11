@@ -11,6 +11,9 @@ import logging
 import os
 from pathlib import Path
 
+# Typing imports
+from typing import Any, Dict, Optional, Union, cast
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +22,7 @@ class SecureTokenStorage:
     Manages secure storage of OAuth tokens, using keyring when available.
     """
 
-    def __init__(self, config_manager):
+    def __init__(self, config_manager: Any) -> None:
         """
         Initialize the SecureTokenStorage.
 
@@ -45,7 +48,7 @@ class SecureTokenStorage:
             # Ensure token directory exists
             os.makedirs(os.path.dirname(self.token_cache_path), exist_ok=True)
 
-    def save_token(self, token_data):
+    def save_token(self, token_data: Union[str, Dict[str, Any]]) -> bool:
         """
         Save token data securely.
 
@@ -76,7 +79,7 @@ class SecureTokenStorage:
             logger.error(f"Failed to save token: {e}")
             return False
 
-    def load_token(self):
+    def load_token(self) -> Optional[Union[str, Dict[str, Any]]]:
         """
         Load token data from secure storage.
 
@@ -98,7 +101,7 @@ class SecureTokenStorage:
 
             # Parse JSON string to dict if we got a string
             if token_data and isinstance(token_data, str):
-                return json.loads(token_data)
+                return cast(Dict[str, Any], json.loads(token_data))
 
             return token_data
         except Exception as e:

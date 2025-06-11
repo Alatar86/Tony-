@@ -6,7 +6,7 @@ This service handles interactions with the local Ollama instance.
 
 import logging
 import time
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -20,7 +20,7 @@ class LocalLlmService:
     Service responsible for interacting with the Ollama API.
     """
 
-    def __init__(self, config_manager):
+    def __init__(self, config_manager: Any) -> None:
         """
         Initialize the LocalLlmService.
 
@@ -75,7 +75,7 @@ class LocalLlmService:
             logger.error(f"Error initializing LocalLlmService: {e}")
             raise ConfigError(f"Failed to initialize LocalLlmService: {str(e)}") from e
 
-    def get_suggestions(self, email_body):
+    def get_suggestions(self, email_body: str) -> List[str]:
         """
         Get reply suggestions for an email.
 
@@ -383,7 +383,7 @@ class LocalLlmService:
         logger.info(f"Parsed {len(filtered_suggestions)} final suggestions")
         return filtered_suggestions
 
-    def check_status(self):
+    def check_status(self) -> bool:
         """
         Check if Ollama service is available.
 
@@ -436,7 +436,7 @@ class LocalLlmService:
             logger.error(f"Error checking Ollama status: {e}")
             return False
 
-    def get_suggestions_with_context(self, email_body, thread_context, is_reply=False):
+    def get_suggestions_with_context(self, email_body: str, thread_context: str, is_reply: bool = False) -> List[str]:
         """
         Get reply suggestions for an email with conversation context.
 

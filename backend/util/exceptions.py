@@ -3,6 +3,7 @@ Custom exceptions for Privacy-Focused Email Agent
 
 This module defines a hierarchy of custom exceptions used throughout the application.
 """
+from typing import Any, Dict, Optional
 
 
 class ServiceError(Exception):
@@ -15,7 +16,7 @@ class ServiceError(Exception):
         details (dict): Additional details about the error
     """
 
-    def __init__(self, message, code=500, details=None):
+    def __init__(self, message: str, code: int = 500, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new ServiceError.
 
@@ -29,7 +30,7 @@ class ServiceError(Exception):
         self.code = code
         self.details = details or {}
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         """
         Convert the exception to a dictionary for JSON serialization.
 
@@ -52,7 +53,7 @@ class AuthError(ServiceError):
     Exception raised for authentication and authorization errors.
     """
 
-    def __init__(self, message="Authentication error", code=401, details=None):
+    def __init__(self, message: str = "Authentication error", code: int = 401, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new AuthError.
 
@@ -69,7 +70,7 @@ class GmailApiError(ServiceError):
     Exception raised for errors related to Gmail API interactions.
     """
 
-    def __init__(self, message="Gmail API error", code=500, details=None):
+    def __init__(self, message: str = "Gmail API error", code: int = 500, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new GmailApiError.
 
@@ -86,7 +87,7 @@ class OllamaError(ServiceError):
     Exception raised for errors related to Ollama API interactions.
     """
 
-    def __init__(self, message="Ollama service error", code=503, details=None):
+    def __init__(self, message: str = "Ollama service error", code: int = 503, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new OllamaError.
 
@@ -103,7 +104,7 @@ class ConfigError(ServiceError):
     Exception raised for configuration-related errors.
     """
 
-    def __init__(self, message="Configuration error", code=500, details=None):
+    def __init__(self, message: str = "Configuration error", code: int = 500, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new ConfigError.
 
@@ -120,7 +121,7 @@ class ValidationError(ServiceError):
     Exception raised for input validation errors.
     """
 
-    def __init__(self, message="Validation error", code=400, details=None):
+    def __init__(self, message: str = "Validation error", code: int = 400, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new ValidationError.
 
@@ -137,7 +138,7 @@ class NotFoundError(ServiceError):
     Exception raised when a requested resource is not found.
     """
 
-    def __init__(self, message="Resource not found", code=404, details=None):
+    def __init__(self, message: str = "Resource not found", code: int = 404, details: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize a new NotFoundError.
 

@@ -58,9 +58,13 @@ def main():
     try:
         # Import backend functionality after path is set up
         from backend.main import run_server
+        from backend.api.api_server import ApiServer
 
-        # Run the server
-        return run_server()
+        # Create API server instance and get the Flask app
+        api_server = ApiServer()
+        
+        # Run the server with the Flask app
+        return run_server(api_server.app)
 
     except ImportError:
         logging.exception("Error importing backend modules. Check your Python path.")

@@ -7,6 +7,7 @@ mocking external dependencies to ensure isolated testing.
 
 import os
 import unittest
+from typing import Any, Dict, Optional
 from unittest.mock import MagicMock, mock_open, patch
 
 from backend.services.google_auth_service import GoogleAuthService
@@ -16,7 +17,7 @@ from backend.util.exceptions import ConfigError
 class TestGoogleAuthService(unittest.TestCase):
     """Test cases for GoogleAuthService"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures"""
         # Create mock objects for dependencies
         self.mock_config_manager = MagicMock()
@@ -32,7 +33,7 @@ class TestGoogleAuthService(unittest.TestCase):
             self.mock_token_storage,
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Tear down test fixtures"""
         # Clean up any environment variables we might have set
         if "GOOGLE_CLIENT_SECRET_JSON_CONTENT" in os.environ:
@@ -48,18 +49,19 @@ class TestGoogleAuthService(unittest.TestCase):
             ),
         },
     )
-    def test_load_client_secrets_from_env_content(self):
+    def test_load_client_secrets_from_env_content(self) -> None:
         """Test loading client secrets from environment variable content"""
         # Call the method under test
         result = self.service._load_client_secrets_from_env()
 
         # Assert the expected result
         self.assertIsNotNone(result)
-        self.assertEqual(result["web"]["client_id"], "test_id")
-        self.assertEqual(result["web"]["client_secret"], "test_secret")
+        if result is not None:  # Type guard for mypy
+            self.assertEqual(result["web"]["client_id"], "test_id")
+            self.assertEqual(result["web"]["client_secret"], "test_secret")
 
     @patch.dict(os.environ, {"GOOGLE_CLIENT_SECRET_JSON_CONTENT": "invalid_json"})
-    def test_load_client_secrets_from_env_invalid_json_content(self):
+    def test_load_client_secrets_from_env_invalid_json_content(self) -> None:
         """Test loading client secrets with invalid JSON content"""
         # Assert that the method raises the expected exception
         with self.assertRaises(ConfigError):
@@ -71,7 +73,7 @@ class TestGoogleAuthService(unittest.TestCase):
         new_callable=mock_open,
         read_data='{"web": {"client_id": "file_id", "client_secret": "file_secret"}}',
     )
-    def test_load_client_secrets_from_env_path(self, mock_file):
+    def test_load_client_secrets_from_env_path(self, mock_file: Any) -> None:
         """Test loading client secrets from a file path specified in
         environment variable"""
         # Call the method under test
@@ -82,12 +84,13 @@ class TestGoogleAuthService(unittest.TestCase):
 
         # Assert the expected result
         self.assertIsNotNone(result)
-        self.assertEqual(result["web"]["client_id"], "file_id")
-        self.assertEqual(result["web"]["client_secret"], "file_secret")
+        if result is not None:  # Type guard for mypy
+            self.assertEqual(result["web"]["client_id"], "file_id")
+            self.assertEqual(result["web"]["client_secret"], "file_secret")
 
     @patch.dict(os.environ, {"GOOGLE_CLIENT_SECRET_JSON_PATH": "/path/to/secrets.json"})
     @patch("builtins.open", side_effect=FileNotFoundError())
-    def test_load_client_secrets_from_env_file_not_found(self, mock_file):
+    def test_load_client_secrets_from_env_file_not_found(self, mock_file: Any) -> None:
         """Test handling of missing client secrets file"""
         # Assert that the method raises the expected exception
         with self.assertRaises(ConfigError):
@@ -95,13 +98,13 @@ class TestGoogleAuthService(unittest.TestCase):
 
     @patch.dict(os.environ, {"GOOGLE_CLIENT_SECRET_JSON_PATH": "/path/to/secrets.json"})
     @patch("builtins.open", new_callable=mock_open, read_data="invalid_json")
-    def test_load_client_secrets_from_env_invalid_json_file(self, mock_file):
+    def test_load_client_secrets_from_env_invalid_json_file(self, mock_file: Any) -> None:
         """Test handling of invalid JSON in client secrets file"""
         # Assert that the method raises the expected exception
         with self.assertRaises(ConfigError):
             self.service._load_client_secrets_from_env()
 
-    def test_load_client_secrets_from_env_no_env_vars(self):
+    def test_load_client_secrets_from_env_no_env_vars(self) -> None:
         """Test behavior when no environment variables are set"""
         # Call the method under test
         result = self.service._load_client_secrets_from_env()

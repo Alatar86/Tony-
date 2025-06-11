@@ -9,6 +9,7 @@ import logging
 import socket
 from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
+from typing import Any, Dict, List, Optional, Union
 
 import httplib2
 from google_auth_httplib2 import AuthorizedHttp
@@ -25,7 +26,7 @@ class GmailApiService:
     Service responsible for interacting with the Gmail API.
     """
 
-    def __init__(self, credentials, config_manager):
+    def __init__(self, credentials: Any, config_manager: Any) -> None:
         """
         Initialize the GmailApiService.
 
@@ -38,7 +39,7 @@ class GmailApiService:
         """
         self.credentials = credentials
         self.config_manager = config_manager
-        self.service = None
+        self.service: Optional[Any] = None  # Make service Optional
 
         # Get configuration parameters
         self.max_results = config_manager.getint("App", "max_emails_fetch", fallback=50)
@@ -57,7 +58,7 @@ class GmailApiService:
             logger.error(f"Failed to initialize Gmail service: {e}")
             raise GmailApiError(f"Failed to initialize Gmail service: {str(e)}") from e
 
-    def _get_service(self):
+    def _get_service(self) -> Any:
         """
         Build and return the Gmail API service object with timeout configuration.
 
@@ -95,7 +96,7 @@ class GmailApiService:
             logger.error(f"Failed to create Gmail API service: {e}")
             raise GmailApiError(f"Failed to create Gmail API service: {str(e)}") from e
 
-    def list_messages(self, label_id=None, thread_id=None, max_results=50):
+    def list_messages(self, label_id: Optional[str] = None, thread_id: Optional[str] = None, max_results: int = 50) -> List[str]:
         """
         List messages, optionally filtered by label.
 
@@ -169,7 +170,7 @@ class GmailApiService:
             logger.error(f"Error listing messages: {e}")
             raise GmailApiError(f"Error listing messages: {str(e)}") from e
 
-    def get_message_metadata(self, message_id):
+    def get_message_metadata(self, message_id: str) -> Dict[str, Any]:
         """
         Get metadata for a specific message.
 
@@ -233,9 +234,9 @@ class GmailApiService:
             logger.error(f"Error getting message metadata: {e}")
             raise GmailApiError(f"Error getting message metadata: {str(e)}") from e
 
-    def get_multiple_messages_metadata(self, message_ids: list[str]) -> dict[str, dict]:
+    def get_multiple_messages_metadata(self, message_ids: List[str]) -> Dict[str, Optional[Dict[str, Any]]]:
         """
-        Fetches metadata for multiple message IDs using a batch request.
+        Fetch metadata for multiple messages efficiently using batch requests.
 
         Args:
             message_ids: A list of message IDs to fetch metadata for.
@@ -249,9 +250,9 @@ class GmailApiService:
         if not message_ids:
             return {}
 
-        metadata_results = {}  # Dictionary to store results, keyed by message_id
+        metadata_results: Dict[str, Optional[Dict[str, Any]]] = {}  # Dictionary to store results, keyed by message_id
 
-        def _batch_callback(request_id, response, exception):
+        def _batch_callback(request_id: str, response: Optional[Dict[str, Any]], exception: Optional[Exception]) -> None:
             """Callback function for the batch request."""
             if exception:
                 # Handle errors for individual requests if needed
@@ -272,6 +273,10 @@ class GmailApiService:
                 try:
                     # Reuse the header parsing logic if it exists as a helper
                     # If not, extract parsing logic from old get_message_metadata here
+                    if response is None:
+                        metadata_results[request_id] = None
+                        return
+                        
                     headers = response.get("payload", {}).get("headers", [])
                     subject = next(
                         (h["value"] for h in headers if h["name"].lower() == "subject"),
@@ -380,7 +385,7 @@ class GmailApiService:
                 f"Batch request failed due to unexpected error: {str(e)}",
             ) from e
 
-    def get_message_details(self, message_id):
+    def get_message_details(self, message_id: str) -> Dict[str, Any]:
         """
         Get the full details of a specific message including body.
 
@@ -468,7 +473,7 @@ class GmailApiService:
             logger.error(f"Error getting message details: {e}")
             raise GmailApiError(f"Error getting message details: {str(e)}") from e
 
-    def archive_message(self, message_id):
+    def archive_message(self, message_id: str) -> Dict[str, Any]:
         """
         Archive a message by removing the INBOX label.
 
@@ -492,11 +497,10 @@ class GmailApiService:
             # To archive a message, we remove the INBOX label
             label_modification = {
                 "removeLabelIds": ["INBOX"],
-                "addLabelIds": [],
             }
 
-            # Call the Gmail API to modify the message's labels
-            result = (
+            # Call the Gmail API
+            response = (
                 service.users()
                 .messages()
                 .modify(
@@ -508,7 +512,7 @@ class GmailApiService:
             )
 
             logger.info(f"Message archived successfully: {message_id}")
-            return result
+            return response  # type: ignore[no-any-return]
 
         except HttpError as error:
             if error.resp.status == 404:
@@ -523,9 +527,9 @@ class GmailApiService:
             logger.error(f"Error archiving message: {e}")
             raise GmailApiError(f"Error archiving message: {str(e)}") from e
 
-    def delete_message(self, message_id):
+    def delete_message(self, message_id: str) -> Dict[str, Any]:
         """
-        Delete a message by moving it to the trash.
+        Delete a message by sending it to trash.
 
         Args:
             message_id (str): Gmail message ID
@@ -541,21 +545,21 @@ class GmailApiService:
             # Ensure we have a service
             service = self._get_service()
 
-            logger.info(f"Deleting message (moving to trash): {message_id}")
+            logger.info(f"Deleting message: {message_id}")
 
-            # Call the Gmail API to trash the message
-            result = (
+            # Call the Gmail API to delete the message
+            response = (
                 service.users()
                 .messages()
-                .trash(
+                .delete(
                     userId="me",
                     id=message_id,
                 )
                 .execute()
             )
 
-            logger.info(f"Message moved to trash successfully: {message_id}")
-            return result
+            logger.info(f"Message deleted successfully: {message_id}")
+            return response  # type: ignore[no-any-return]
 
         except HttpError as error:
             if error.resp.status == 404:
@@ -570,96 +574,107 @@ class GmailApiService:
             logger.error(f"Error deleting message: {e}")
             raise GmailApiError(f"Error deleting message: {str(e)}") from e
 
-    def send_email(self, to, subject, body, reply_to=None):
+    def send_email(self, to: str, subject: str, body: str, reply_to: Optional[str] = None) -> Dict[str, Any]:
         """
-        Send an email.
+        Send an email through Gmail API.
 
         Args:
             to (str): Recipient email address
             subject (str): Email subject
-            body (str): Email body content (plain text)
-            reply_to (str, optional): Message ID to reply to
+            body (str): Email body
+            reply_to (str, optional): Reply-to email address. Defaults to None.
 
         Returns:
             dict: Response from Gmail API
 
         Raises:
-            ValidationError: If required parameters are missing or invalid
-            GmailApiError: If sending fails
+            GmailApiError: If API call fails
+            ValidationError: If input parameters are invalid
         """
         try:
-            # Validate parameters
-            if not to:
-                raise ValidationError("Recipient email address is required")
-            if not subject:
-                logger.warning("Email sent with no subject")
-            if not body:
-                raise ValidationError("Email body cannot be empty")
+            # Validate required parameters
+            if not to or not isinstance(to, str):
+                logger.error("Invalid 'to' parameter")
+                raise ValidationError("Email recipient is required and must be a string")
+
+            if not subject or not isinstance(subject, str):
+                logger.error("Invalid 'subject' parameter")
+                raise ValidationError("Email subject is required and must be a string")
+
+            if not body or not isinstance(body, str):
+                logger.error("Invalid 'body' parameter")
+                raise ValidationError("Email body is required and must be a string")
 
             # Ensure we have a service
             service = self._get_service()
 
-            logger.info(f"Sending email to: {to}, Subject: {subject}")
+            logger.info(f"Sending email to: {to}")
 
-            # Create a MIMEText object for the email
+            # Create the email message
             message = MIMEText(body)
-            message["To"] = to
-            message["Subject"] = subject
+            message["to"] = to
+            message["subject"] = subject
 
-            # Generate a proper Message-ID for this email
-            message["Message-ID"] = make_msgid(domain="privacyemail.app")
+            # Set the From header to the user's email
+            user_email = self.get_user_email()
+            if user_email:
+                message["from"] = user_email
+
+            # Add a Message-ID header for tracking
+            message["Message-ID"] = make_msgid()
+
+            # Add a Date header
             message["Date"] = formatdate(localtime=True)
 
-            # If this is a reply, include In-Reply-To and References headers
-            if reply_to:
-                logger.debug(f"Setting up as reply to message: {reply_to}")
-
-                try:
-                    # Get the original message details to extract necessary headers
+            # For replies, set up proper threading headers
+            try:
+                # For replies, construct proper threading headers
+                if reply_to:
+                    # Get the original message to set up proper reply headers
                     original = self.get_message_details(reply_to)
-                    if original:
-                        # Add References from original message to
-                        # keep the thread
-                        references = []
 
-                        # First, add original message References for threading
-                        if original.get("references"):
-                            references.extend(
-                                [
-                                    ref.strip()
-                                    for ref in original.get("references").split()
-                                ],
-                            )
+                    # Set up threading headers
+                    references = []
 
-                        # Then add the original message's Message-ID
-                        original_message_id = original.get("message_id")
-                        if (
-                            original_message_id
-                            and original_message_id not in references
-                        ):
-                            references.append(original_message_id)
+                    # First, add original message References for threading
+                    original_references = original.get("references")
+                    if original_references:
+                        references.extend(
+                            [
+                                ref.strip()
+                                for ref in original_references.split()
+                            ],
+                        )
 
-                        # Set the headers if we found valid references
-                        if references:
-                            # Set References header with all IDs
-                            message["References"] = " ".join(references)
+                    # Then add the original message's Message-ID
+                    original_message_id = original.get("message_id")
+                    if (
+                        original_message_id
+                        and original_message_id not in references
+                    ):
+                        references.append(original_message_id)
 
-                            # Set In-Reply-To header to the direct parent message ID
-                            if original_message_id:
-                                message["In-Reply-To"] = original_message_id
+                    # Set the headers if we found valid references
+                    if references:
+                        # Set References header with all IDs
+                        message["References"] = " ".join(references)
 
-                        else:
-                            # Fallback: use Gmail ID if no Message-ID/References found
-                            fallback_id = f"<{reply_to}@mail.gmail.com>"
-                            message["References"] = fallback_id
-                            message["In-Reply-To"] = fallback_id
+                        # Set In-Reply-To header to the direct parent message ID
+                        if original_message_id:
+                            message["In-Reply-To"] = original_message_id
 
-                        # Normally sourced from credentials/user profile.
-                        # Here we simply keep headers consistent.
+                    else:
+                        # Fallback: use Gmail ID if no Message-ID/References found
+                        fallback_id = f"<{reply_to}@mail.gmail.com>"
+                        message["References"] = fallback_id
+                        message["In-Reply-To"] = fallback_id
 
-                except Exception as e:
-                    logger.warning(f"Could not set up proper reply headers: {e}")
-                    # Continue without reply headers, but log the error
+                    # Normally sourced from credentials/user profile.
+                    # Here we simply keep headers consistent.
+
+            except Exception as e:
+                logger.warning(f"Could not set up proper reply headers: {e}")
+                # Continue without reply headers, but log the error
 
             # Encode the message for the Gmail API
             raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
@@ -693,7 +708,7 @@ class GmailApiService:
             logger.info(
                 f"Email sent successfully. Message ID: {sent_message.get('id')}",
             )
-            return sent_message
+            return sent_message  # type: ignore[no-any-return]
 
         except HttpError as error:
             logger.error(f"HTTP error while sending email: {error}")
@@ -719,20 +734,17 @@ class GmailApiService:
             logger.error(f"Error sending email: {e}")
             raise GmailApiError(f"Error sending email: {str(e)}") from e
 
-    def _get_body_text(self, payload, depth=0, max_depth=10):
+    def _get_body_text(self, payload: Dict[str, Any], depth: int = 0, max_depth: int = 10) -> tuple[str, bool]:
         """
-        Extract text from a message payload, properly handling HTML content.
-        Traverses MIME structure recursively, prioritizing HTML content when available.
+        Extract the body text from a Gmail message payload.
 
         Args:
-            payload (dict): Gmail message payload
-            depth (int): Current recursion depth
-            max_depth (int): Maximum recursion depth to prevent infinite loops
+            payload: Gmail message payload
+            depth: Current recursion depth
+            max_depth: Maximum recursion depth
 
         Returns:
-            tuple: (body_content, is_html) where:
-                - body_content is the extracted content (raw HTML if HTML is found)
-                - is_html is a boolean indicating if the returned content is HTML
+            tuple: (body_text, is_html) where is_html indicates if content was HTML
         """
         # Guard against excessive recursion
         if depth > max_depth:
@@ -798,15 +810,15 @@ class GmailApiService:
         # Last resort: return an empty string
         return "", False
 
-    def _decode_base64(self, data):
+    def _decode_base64(self, data: str) -> str:
         """
-        Decode base64 URL-safe encoded string.
+        Decode base64 URL-safe encoded data.
 
         Args:
-            data (str): Base64 encoded data
+            data: Base64 encoded string
 
         Returns:
-            str: Decoded text
+            str: Decoded string
         """
         try:
             # Add padding if needed
@@ -826,15 +838,15 @@ class GmailApiService:
             logger.error(f"Error decoding base64: {e}")
             return "(Could not decode message body)"
 
-    def _map_folder_to_label(self, folder):
+    def _map_folder_to_label(self, folder: str) -> str:
         """
-        Map a folder name to a Gmail API label ID.
+        Map folder names to Gmail label IDs.
 
         Args:
-            folder (str): Folder name from frontend
+            folder: Folder name
 
         Returns:
-            str: Corresponding Gmail API label ID
+            str: Gmail label ID
         """
         # Define mapping for folder names to Gmail API label IDs
         label_mapping = {
@@ -854,15 +866,15 @@ class GmailApiService:
         # Return the mapped label ID or the original folder name if not in mapping
         return label_mapping.get(folder, folder)
 
-    def _extract_message_id_header(self, headers):
+    def _extract_message_id_header(self, headers: Dict[str, str]) -> str:
         """
-        Extract the Message-ID header from the email headers.
+        Extract the Message-ID header from email headers.
 
         Args:
-            headers (dict): Email headers
+            headers: Dictionary of email headers
 
         Returns:
-            str: Message-ID header value or empty string if not found
+            str: Message-ID header value
         """
         # Check for both 'Message-ID' and 'Message-Id' variants
         message_id = headers.get("Message-ID", headers.get("Message-Id", ""))
@@ -873,24 +885,27 @@ class GmailApiService:
 
         return message_id
 
-    def _extract_references_header(self, headers):
+    def _extract_references_header(self, headers: Dict[str, str]) -> List[str]:
         """
-        Extract the References header from the email headers.
+        Extract References header and return as list of message IDs.
 
         Args:
-            headers (dict): Email headers
+            headers: Dictionary of email headers
 
         Returns:
-            str: References header value or empty string if not found
+            list: List of message IDs from References header
         """
-        return headers.get("References", "")
+        references = headers.get("References", "")
+        if references:
+            return references.split()
+        return []
 
-    def get_user_email(self):
+    def get_user_email(self) -> Optional[str]:
         """
-        Get the email address of the authenticated user.
+        Get the authenticated user's email address.
 
         Returns:
-            str: The user's email address or None if it can't be retrieved
+            str: User's email address, or None if it can't be retrieved
 
         Raises:
             GmailApiError: If API call fails
@@ -899,19 +914,16 @@ class GmailApiService:
             # Ensure we have a service
             service = self._get_service()
 
-            logger.debug("Fetching user profile")
-
-            # Call the Gmail API to get user profile
+            # Call the Gmail API to get the user's profile
             profile = service.users().getProfile(userId="me").execute()
 
-            # Extract email address
             email_address = profile.get("emailAddress")
-            if not email_address:
+            if email_address:
+                logger.info(f"Retrieved user email: {email_address}")
+                return email_address  # type: ignore[no-any-return]
+            else:
                 logger.warning("No email address found in user profile")
                 return None
-
-            logger.debug(f"Retrieved user email: {email_address}")
-            return email_address
 
         except HttpError as error:
             logger.error(f"HTTP error while getting user profile: {error}")
@@ -920,14 +932,14 @@ class GmailApiService:
             logger.error(f"Error getting user profile: {e}")
             return None
 
-    def modify_message_labels(self, message_id, add_labels=None, remove_labels=None):
+    def modify_message_labels(self, message_id: str, add_labels: Optional[List[str]] = None, remove_labels: Optional[List[str]] = None) -> Dict[str, Any]:
         """
-        Modify a message's labels (add and/or remove).
+        Modify labels on a message.
 
         Args:
             message_id (str): Gmail message ID
-            add_labels (list, optional): List of label IDs to add
-            remove_labels (list, optional): List of label IDs to remove
+            add_labels (list, optional): Labels to add. Defaults to None.
+            remove_labels (list, optional): Labels to remove. Defaults to None.
 
         Returns:
             dict: Response from Gmail API
@@ -935,21 +947,27 @@ class GmailApiService:
         Raises:
             GmailApiError: If API call fails
             NotFoundError: If the message is not found
+            ValidationError: If no labels are specified
         """
         try:
+            # Validate that at least one label operation is specified
+            if not add_labels and not remove_labels:
+                raise ValidationError("At least one of add_labels or remove_labels must be specified")
+
             # Ensure we have a service
             service = self._get_service()
 
             logger.info(f"Modifying labels for message: {message_id}")
 
-            # Create a label modification request
-            label_modification = {
-                "removeLabelIds": remove_labels or [],
-                "addLabelIds": add_labels or [],
-            }
+            # Build the label modification request
+            label_modification = {}
+            if add_labels:
+                label_modification["addLabelIds"] = add_labels
+            if remove_labels:
+                label_modification["removeLabelIds"] = remove_labels
 
-            # Call the Gmail API to modify the message's labels
-            result = (
+            # Call the Gmail API
+            response = (
                 service.users()
                 .messages()
                 .modify(
@@ -960,8 +978,9 @@ class GmailApiService:
                 .execute()
             )
 
-            logger.info(f"Message labels modified successfully: {message_id}")
-            return result
+            logger.info(f"Labels modified successfully for message: {message_id}")
+
+            return response  # type: ignore[no-any-return]
 
         except HttpError as error:
             if error.resp.status == 404:

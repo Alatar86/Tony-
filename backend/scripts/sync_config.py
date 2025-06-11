@@ -10,6 +10,7 @@ import logging
 import os
 import shutil
 import sys
+from typing import Dict, Any, Optional, List, Tuple, Union, NoReturn
 
 # Configure logging
 logging.basicConfig(
@@ -19,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger("config_sync")
 
 
-def sync_configuration():
+def sync_configuration() -> bool:
     """
     Sync configuration files between project root and backend/config directory.
 
@@ -116,7 +117,7 @@ def sync_configuration():
     return True
 
 
-def main():
+def main() -> int:
     """Main entry point"""
     logger.info("Starting configuration sync")
     success = sync_configuration()

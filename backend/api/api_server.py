@@ -6,8 +6,10 @@ and registering API blueprints.
 """
 
 import logging
+from typing import Any, Optional, Tuple
 
 from flask import Flask, jsonify, request
+from flask.wrappers import Response
 
 from ..services.gmail_api_service import GmailApiService
 from ..services.google_auth_service import GoogleAuthService
@@ -41,7 +43,7 @@ class ApiServer:
     Initializes services, registers error handlers, and registers API blueprints.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the API server and services"""
         # Create Flask app
         self.app = Flask(__name__)
@@ -60,7 +62,7 @@ class ApiServer:
         # Gmail service will be created when needed with valid credentials
         # Note: This instance variable might become less necessary if routes
         # always use the _get_authenticated_gmail_service helper method.
-        self.gmail_service = None
+        self.gmail_service: Optional[GmailApiService] = None
 
         # Store service instances and helper methods in app config for Blueprint access
         # Using a dedicated key like 'SERVICES' avoids cluttering the config root.
@@ -83,45 +85,45 @@ class ApiServer:
 
         logger.info("API server initialized with blueprints registered")
 
-    def _register_error_handlers(self):
+    def _register_error_handlers(self) -> None:
         """Register error handlers for custom exceptions"""
 
         @self.app.errorhandler(ServiceError)
-        def handle_service_error(error):
+        def handle_service_error(error: ServiceError) -> Tuple[Response, int]:
             """Handle all ServiceError instances"""
             logger.error(f"Service error: {error.message}")
             return jsonify(error.to_dict()), error.code
 
         # Handle specific subclasses if needed, or let them fall through to ServiceError
         @self.app.errorhandler(AuthError)
-        def handle_auth_error(error):
+        def handle_auth_error(error: AuthError) -> Tuple[Response, int]:
             logger.error(f"Auth error: {error.message}")
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(GmailApiError)
-        def handle_gmail_api_error(error):
+        def handle_gmail_api_error(error: GmailApiError) -> Tuple[Response, int]:
             logger.error(f"Gmail API error: {error.message}")
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(OllamaError)
-        def handle_ollama_error(error):
+        def handle_ollama_error(error: OllamaError) -> Tuple[Response, int]:
             logger.error(f"Ollama error: {error.message}")
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(ConfigError)
-        def handle_config_error(error):
+        def handle_config_error(error: ConfigError) -> Tuple[Response, int]:
             logger.error(f"Config error: {error.message}")
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(ValidationError)
-        def handle_validation_error(error):
+        def handle_validation_error(error: ValidationError) -> Tuple[Response, int]:
             logger.warning(
                 f"Validation error: {error.message}",
             )  # Usually client error, log as warning
             return jsonify(error.to_dict()), error.code
 
         @self.app.errorhandler(NotFoundError)
-        def handle_not_found_error(error):
+        def handle_not_found_error(error: NotFoundError) -> Tuple[Response, int]:
             logger.warning(
                 f"Resource not found: {error.message}",
             )  # Usually client error, log as warning
@@ -129,7 +131,7 @@ class ApiServer:
 
         # Standard HTTP errors
         @self.app.errorhandler(404)
-        def handle_404(error):
+        def handle_404(error: Any) -> Tuple[Response, int]:
             """Handle 404 Not Found errors"""
             logger.info(f"Not found: {request.path}")
             # Ensure consistent JSON format
@@ -139,7 +141,7 @@ class ApiServer:
             return jsonify(nf_error.to_dict()), nf_error.code
 
         @self.app.errorhandler(405)
-        def handle_405(error):
+        def handle_405(error: Any) -> Tuple[Response, int]:
             """Handle 405 Method Not Allowed errors"""
             logger.info(f"Method not allowed: {request.method} {request.path}")
             ma_error = ServiceError(
@@ -150,7 +152,7 @@ class ApiServer:
             return jsonify(ma_error.to_dict()), ma_error.code
 
         @self.app.errorhandler(500)
-        def handle_500(error):
+        def handle_500(error: Any) -> Tuple[Response, int]:
             """Handle generic 500 Internal Server Error"""
             # Log the original exception if possible
             logger.exception(
@@ -163,7 +165,7 @@ class ApiServer:
     # def _setup_routes(self):
     #    pass
 
-    def _get_authenticated_gmail_service(self):
+    def _get_authenticated_gmail_service(self) -> Optional[GmailApiService]:
         """
         Get an authenticated Gmail service instance.
         This method remains here because it depends on self.auth_service and
@@ -199,7 +201,7 @@ class ApiServer:
             logger.exception(f"Error getting/creating Gmail service: {e}")
             return None
 
-    def run(self):
+    def run(self) -> None:
         """Run the API server"""
         host = self.config_manager.get("API", "host", fallback="127.0.0.1")
         port = self.config_manager.getint("API", "port", fallback=5000)
@@ -214,7 +216,7 @@ class ApiServer:
 
 # Entry point for running the server (e.g., for development)
 # The main entry point is usually run_backend.py
-def main():
+def main() -> None:
     """Main entry point for the API server if run directly"""
     # Basic logging if run directly (might differ from run_backend.py setup)
     logging.basicConfig(level=logging.INFO)

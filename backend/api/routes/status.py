@@ -4,7 +4,7 @@ Status endpoint
 
 import logging
 
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, Response
 
 # No longer importing services directly, will use current_app
 from ...util.exceptions import ServiceError  # Keep specific exceptions needed
@@ -15,7 +15,7 @@ status_bp = Blueprint("status_bp", __name__, url_prefix="/status")
 
 
 @status_bp.route("", methods=["GET"])
-def status():
+def status() -> Response:
     """Get overall backend status"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     llm_service = current_app.config["SERVICES"]["llm_service"]

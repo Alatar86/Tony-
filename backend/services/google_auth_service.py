@@ -1,23 +1,24 @@
 """
-GoogleAuthService for Privacy-Focused Email Agent
+Google Authentication Service
 
-This service handles OAuth 2.0 authentication with Google Gmail API.
-It manages the authentication flow, token acquisition, storage, and refresh.
+This service handles OAuth 2.0 authentication with Google for Gmail API access.
 """
 
-import importlib.resources
 import json
 import logging
+import importlib.resources
 import os
+from typing import Any, Dict, Optional
 
-from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.exceptions import RefreshError
 
+from ..util.config_manager import ConfigurationManager
 from ..util.exceptions import AuthError, ConfigError
+from ..util.secure_token_storage import SecureTokenStorage
 
-# Configure logger
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +27,7 @@ class GoogleAuthService:
     Service responsible for handling OAuth 2.0 authentication with Google.
     """
 
-    def __init__(self, config_manager, token_storage):
+    def __init__(self, config_manager: ConfigurationManager, token_storage: SecureTokenStorage) -> None:
         """
         Initialize the GoogleAuthService.
 
@@ -36,11 +37,12 @@ class GoogleAuthService:
         """
         self.config_manager = config_manager
         self.token_storage = token_storage
-        self.credentials = None
+        self.credentials: Optional[Credentials] = None
 
         try:
             # Configuration values
-            self.scopes = self.config_manager.get("Google", "scopes").split(",")
+            scopes_str = self.config_manager.get("Google", "scopes")
+            self.scopes = scopes_str.split(",") if scopes_str else []
 
             logger.info("GoogleAuthService initialized.")
             logger.info(f"Scopes: {self.scopes}")
@@ -50,7 +52,7 @@ class GoogleAuthService:
                 f"Failed to initialize GoogleAuthService: {str(e)}"
             ) from e
 
-    def get_credentials(self):
+    def get_credentials(self) -> Optional[Credentials]:
         """
         Get valid credentials for Gmail API access.
 
@@ -119,7 +121,7 @@ class GoogleAuthService:
             logger.error(f"Authentication failed: {e}")
             raise AuthError(f"Authentication failed: {str(e)}") from e
 
-    def initiate_auth_flow(self):
+    def initiate_auth_flow(self) -> bool:
         """
         Explicitly trigger the OAuth 2.0 authorization flow.
 
@@ -140,7 +142,7 @@ class GoogleAuthService:
             logger.error(f"OAuth flow failed: {e}")
             raise AuthError(f"OAuth flow failed: {str(e)}") from e
 
-    def check_auth_status(self):
+    def check_auth_status(self) -> bool:
         """
         Check if we have valid authentication.
 
@@ -154,7 +156,7 @@ class GoogleAuthService:
             logger.error(f"Auth status check failed: {e}")
             return False
 
-    def _run_auth_flow(self):
+    def _run_auth_flow(self) -> None:
         """
         Run the OAuth 2.0 authorization flow to get new credentials.
 
@@ -222,141 +224,71 @@ class GoogleAuthService:
             <head>
                 <title>Authentication Successful</title>
                 <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        padding: 40px;
-                        background-color: #f7f9fc;
-                    }
-                    .container {
-                        background-color: white;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                        padding: 30px;
-                        max-width: 500px;
-                        margin: 0 auto;
-                    }
-                    h1 { color: #066adb; }
-                    .success-icon {
-                        color: #4CAF50;
-                        font-size: 48px;
-                    }
-                    .message {
-                        margin: 20px 0;
-                        color: #333;
-                    }
-                    .close-button {
-                        background-color: #066adb;
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 16px;
-                    }
+                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .success { color: #28a745; font-size: 24px; margin-bottom: 20px; }
+                    .info { color: #6c757d; font-size: 16px; }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <div class="success-icon">✓</div>
-                    <h1>Authentication Successful!</h1>
-                    <p class="message">
-                        You have successfully authenticated with Google.
-                    </p>
-                    <p>You can now close this window and return to the application.</p>
-                    <button class="close-button" onclick="window.close()">
-                        Close Window
-                    </button>
-                    <script>
-                        // Auto-close after 5 seconds
-                        setTimeout(function() {
-                            window.close();
-                        }, 5000);
-                    </script>
+                    <div class="success">✓ Authentication Successful!</div>
+                    <div class="info">
+                        You have successfully authorized the Email Agent to access your Gmail account.
+                        <br><br>
+                        You can now close this tab and return to the application.
+                    </div>
                 </div>
             </body>
             </html>
             """
 
-            # Run the flow with the custom success message
+            # Run the OAuth flow with the local server
             self.credentials = flow.run_local_server(
                 port=0,  # Use any available port
-                # Always ask for consent to ensure we get refresh tokens
-                prompt="consent",
+                authorization_prompt_message="",
                 success_message=success_message,
                 open_browser=True,
-                authorization_prompt_message=(
-                    "Please authorize the application in your browser"
-                ),
-                timeout_seconds=120,  # 2 minute timeout for the whole flow
             )
 
-            # Save the credentials for future use
+            # Save the credentials to secure storage
             if self.credentials:
-                logger.info("OAuth flow completed successfully - saving new token")
                 self.token_storage.save_token(self.credentials.to_json())
+                logger.info("OAuth flow completed successfully and credentials saved")
             else:
                 raise AuthError("OAuth flow completed but no credentials were obtained")
 
-        except ConfigError:
-            # Re-raise custom exceptions
-            raise
         except Exception as e:
-            logger.exception(
-                f"Unhandled exception during OAuth flow: {e}",
-            )  # Use logger.exception to include stack trace
-            raise AuthError(
-                f"An unexpected error occurred during OAuth flow: {str(e)}",
-            ) from e
+            error_msg = f"OAuth flow failed: {str(e)}"
+            logger.error(error_msg)
+            raise AuthError(error_msg) from e
 
-    def _load_client_secrets_from_env(self):
+    def _load_client_secrets_from_env(self) -> Optional[Dict[str, Any]]:
         """
         Load client secrets from environment variables.
 
-        Tries two approaches:
-        1. Load JSON content directly from GOOGLE_CLIENT_SECRET_JSON_CONTENT
-        2. Load from a file path specified in GOOGLE_CLIENT_SECRET_JSON_PATH
-
         Returns:
-            dict: Client secrets configuration or None if not found
+            dict: Client secrets configuration or None if not available
+
+        Expected environment variables:
+            GOOGLE_CLIENT_ID: OAuth client ID
+            GOOGLE_CLIENT_SECRET: OAuth client secret
         """
-        # Try to load JSON content directly from environment variable
-        json_content = os.environ.get("GOOGLE_CLIENT_SECRET_JSON_CONTENT")
-        if json_content:
-            try:
-                logger.info(
-                    "Loading client secrets from GOOGLE_CLIENT_SECRET_JSON_CONTENT",
-                )
-                return json.loads(json_content)
-            except json.JSONDecodeError as e:
-                logger.error(f"Error parsing GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}")
-                raise ConfigError(
-                    f"Invalid JSON in GOOGLE_CLIENT_SECRET_JSON_CONTENT: {e}",
-                ) from e
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
-        # Try to load from file path specified in environment variable
-        json_path = os.environ.get("GOOGLE_CLIENT_SECRET_JSON_PATH")
-        if json_path:
-            try:
-                logger.info(
-                    "Loading client secrets from path in "
-                    f"GOOGLE_CLIENT_SECRET_JSON_PATH: {json_path}",
-                )
-                with open(json_path, "r") as f:
-                    return json.load(f)
-            except FileNotFoundError as e:
-                logger.error(f"Client secrets file not found at path: {json_path}")
-                raise ConfigError(
-                    f"Client secrets file not found at path: {json_path}"
-                ) from e
-            except json.JSONDecodeError as e:
-                logger.error(f"Error parsing client secrets file at {json_path}: {e}")
-                raise ConfigError(
-                    f"Invalid JSON in client secrets file at {json_path}: {e}",
-                ) from e
-            except Exception as e:
-                logger.error(f"Error reading client secrets file at {json_path}: {e}")
-                raise ConfigError(f"Error reading client secrets file: {e}") from e
+        if not client_id or not client_secret:
+            logger.debug("Google client credentials not found in environment variables")
+            return None
 
-        # If neither environment variable is set, return None
-        return None
+        logger.info("Found Google client credentials in environment variables")
+        return {
+            "installed": {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "redirect_uris": ["http://localhost"],
+            }
+        }

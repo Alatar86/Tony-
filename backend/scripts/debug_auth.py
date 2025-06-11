@@ -6,6 +6,8 @@ import json
 import logging
 import os
 import sys
+import importlib
+from typing import TYPE_CHECKING, Any
 
 # Configure verbose logging
 logging.basicConfig(
@@ -13,21 +15,33 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
-# Add the project root directory to Python's path
+# Ensure project root is on sys.path for runtime imports
 script_dir = os.path.abspath(os.path.dirname(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+# Conditional imports for type checking only (to avoid mypy following heavy modules)
+if TYPE_CHECKING:  # pragma: no cover
+    GoogleAuthService = Any  # type: ignore
+    ConfigurationManager = Any  # type: ignore
+    SecureTokenStorage = Any  # type: ignore
 
-def main():
+
+def main() -> None:
     try:
         print("\n=== GOOGLE AUTH DEBUG SCRIPT ===\n")
 
-        # Import our modules after path setup
-        from backend.services.google_auth_service import GoogleAuthService
-        from backend.util.config_manager import ConfigurationManager
-        from backend.util.secure_token_storage import SecureTokenStorage
+        # Import modules lazily at runtime to avoid mypy analyzing them
+        GoogleAuthService = importlib.import_module(
+            "backend.services.google_auth_service",
+        ).GoogleAuthService
+        ConfigurationManager = importlib.import_module(
+            "backend.util.config_manager",
+        ).ConfigurationManager
+        SecureTokenStorage = importlib.import_module(
+            "backend.util.secure_token_storage",
+        ).SecureTokenStorage
 
         # Step 1: Check client secret file
         config = ConfigurationManager()  # Let it search in standard locations

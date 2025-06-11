@@ -7,6 +7,7 @@ This utility class provides centralized access to application configuration.
 import configparser
 import logging
 import os
+from typing import Any, Dict, Optional
 
 from .exceptions import ConfigError
 
@@ -21,13 +22,16 @@ class ConfigurationManager:
 
     # Environment variable prefix for configuration overrides
     ENV_PREFIX = "APP_"
+    
+    # Singleton instance
+    _instance: Optional['ConfigurationManager'] = None
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file: Optional[str] = None) -> None:
         """
         Initialize the ConfigurationManager.
 
         Args:
-            config_file (str): Path to the configuration file
+            config_file (Optional[str]): Path to the configuration file
                 (default: look in standard locations)
         """
         # Look for config in standard locations if not specified
@@ -54,8 +58,8 @@ class ConfigurationManager:
                     config_file = location
                     break
 
-        self.config_file = config_file
-        self.config = configparser.ConfigParser()
+        self.config_file: Optional[str] = config_file
+        self.config: configparser.ConfigParser = configparser.ConfigParser()
 
         # Load configuration
         if config_file and os.path.exists(config_file):
@@ -78,7 +82,22 @@ class ConfigurationManager:
             # Apply environment variable overrides to default config
             self._apply_env_overrides()
 
-    def _apply_env_overrides(self):
+    @classmethod
+    def get_instance(cls, config_file: Optional[str] = None) -> 'ConfigurationManager':
+        """
+        Get the singleton instance of ConfigurationManager.
+        
+        Args:
+            config_file (Optional[str]): Path to the configuration file
+        
+        Returns:
+            ConfigurationManager: The singleton instance
+        """
+        if cls._instance is None:
+            cls._instance = cls(config_file)
+        return cls._instance
+
+    def _apply_env_overrides(self) -> None:
         """
         Override configuration values with environment variables.
         Environment variable naming convention: APP_SECTION_KEY (all uppercase)
@@ -106,7 +125,7 @@ class ConfigurationManager:
                         f"[{section}] {key} = {converted_value}",
                     )
 
-    def _convert_value(self, env_value, original_value):
+    def _convert_value(self, env_value: str, original_value: str) -> str:
         """
         Attempt to convert an environment variable value to the same type
         as the original value.
@@ -116,7 +135,7 @@ class ConfigurationManager:
             original_value (str): The original value from the config file
 
         Returns:
-            The converted value, or the original string if conversion fails
+            str: The converted value, or the original string if conversion fails
         """
         try:
             # Try boolean conversion first (special case)
@@ -161,17 +180,17 @@ class ConfigurationManager:
             )
             return env_value
 
-    def get(self, section, key, fallback=None):
+    def get(self, section: str, key: str, fallback: Optional[Any] = None) -> Optional[str]:
         """
         Get a configuration value.
 
         Args:
             section (str): Configuration section name
             key (str): Configuration key name
-            fallback: Default value if section/key doesn't exist
+            fallback (Optional[Any]): Default value if section/key doesn't exist
 
         Returns:
-            The configuration value or fallback if not found
+            Optional[str]: The configuration value or fallback if not found
         """
         try:
             return self.config.get(section, key)
@@ -179,7 +198,23 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def getint(self, section, key, fallback=None):
+    def get_section(self, section: str) -> Dict[str, str]:
+        """
+        Get an entire configuration section as a dictionary.
+        
+        Args:
+            section (str): Configuration section name
+            
+        Returns:
+            Dict[str, str]: Dictionary of key-value pairs in the section
+        """
+        try:
+            return dict(self.config[section])
+        except KeyError:
+            logger.warning(f"Configuration section not found: {section}")
+            return {}
+
+    def getint(self, section: str, key: str, fallback: Optional[int] = None) -> Optional[int]:
         """Get configuration value as integer"""
         try:
             return self.config.getint(section, key)
@@ -187,7 +222,7 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def getfloat(self, section, key, fallback=None):
+    def getfloat(self, section: str, key: str, fallback: Optional[float] = None) -> Optional[float]:
         """Get configuration value as float"""
         try:
             return self.config.getfloat(section, key)
@@ -195,7 +230,7 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def getboolean(self, section, key, fallback=None):
+    def getboolean(self, section: str, key: str, fallback: Optional[bool] = None) -> Optional[bool]:
         """Get configuration value as boolean"""
         try:
             return self.config.getboolean(section, key)
@@ -203,7 +238,7 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def save(self):
+    def save(self) -> None:
         """Save current configuration to potentially multiple files."""
         # Define potential file paths
         root_config_path = os.path.join(
@@ -230,7 +265,7 @@ class ConfigurationManager:
 
         files_to_save = [primary_config_file]
         # Add the other known location if it exists and is different
-        other_path = None
+        other_path: Optional[str] = None
         if primary_config_file == root_config_path and os.path.exists(
             backend_config_path,
         ):
@@ -267,7 +302,7 @@ class ConfigurationManager:
                 # but log which file failed
                 raise ConfigError(f"Failed to write config to {file_path}: {e}") from e
 
-    def _create_default_config(self):
+    def _create_default_config(self) -> None:
         """Create default configuration file"""
         logger.info("Creating default configuration")
 

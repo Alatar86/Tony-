@@ -3,6 +3,7 @@ Email related routes (list, get, suggest, send, archive, delete, modify)
 """
 
 import logging
+from typing import Any
 
 from flask import Blueprint, current_app, jsonify, request
 
@@ -20,7 +21,7 @@ emails_bp = Blueprint("emails_bp", __name__, url_prefix="/emails")
 
 
 @emails_bp.route("", methods=["GET"])
-def list_emails():
+def list_emails() -> Any:
     """List emails using a specific label ID."""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     config_manager = current_app.config["SERVICES"]["config_manager"]
@@ -119,7 +120,7 @@ def list_emails():
 
 
 @emails_bp.route("/<message_id>", methods=["GET"])
-def get_email(message_id):
+def get_email(message_id: str) -> Any:
     """Get details for a specific email"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     get_gmail_service = current_app.config["SERVICES"]["get_gmail_service"]
@@ -146,7 +147,7 @@ def get_email(message_id):
 
 
 @emails_bp.route("/<message_id>/suggestions", methods=["GET"])
-def get_suggestions(message_id):
+def get_suggestions(message_id: str) -> Any:
     """Get AI-generated reply suggestions for an email"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     llm_service = current_app.config["SERVICES"]["llm_service"]
@@ -259,7 +260,7 @@ def get_suggestions(message_id):
 
 
 @emails_bp.route("/<message_id>/archive", methods=["POST"])
-def archive_email(message_id):
+def archive_email(message_id: str) -> Any:
     """Archive a specific email"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     get_gmail_service = current_app.config["SERVICES"]["get_gmail_service"]
@@ -292,7 +293,7 @@ def archive_email(message_id):
 
 
 @emails_bp.route("/<message_id>/delete", methods=["DELETE"])
-def delete_email(message_id):
+def delete_email(message_id: str) -> Any:
     """Delete a specific email (move to trash)"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     get_gmail_service = current_app.config["SERVICES"]["get_gmail_service"]
@@ -325,7 +326,7 @@ def delete_email(message_id):
 
 
 @emails_bp.route("/send", methods=["POST"])
-def send_email():
+def send_email() -> Any:
     """Send a new email"""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     get_gmail_service = current_app.config["SERVICES"]["get_gmail_service"]
@@ -374,7 +375,7 @@ def send_email():
 
 
 @emails_bp.route("/<message_id>/modify", methods=["POST"])
-def modify_email_labels(message_id):
+def modify_email_labels(message_id: str) -> Any:
     """Modify email labels OR perform actions like trash/archive."""
     auth_service = current_app.config["SERVICES"]["auth_service"]
     get_gmail_service = current_app.config["SERVICES"]["get_gmail_service"]

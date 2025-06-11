@@ -82,7 +82,7 @@
                         <Label fx:id="dateLabel" text="--" HBox.hgrow="ALWAYS"/>
                     </HBox>
                     <Separator/>
-                    <WebView fx:id="emailBodyView" VBox.vgrow="ALWAYS" styleClass="email-body-view"/>
+                    <WebView fx:id="emailBodyView" VBox.vgrow="ALWAYS"/>
                 </VBox>
 
                 <!-- Action Buttons -->

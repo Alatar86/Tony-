@@ -60,6 +60,14 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "google_auth_httplib2"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "google_auth_oauthlib.flow"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 addopts = "-v"

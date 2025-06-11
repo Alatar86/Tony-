@@ -4,8 +4,9 @@ Configuration related routes
 
 import configparser
 import logging
+from typing import Any, Dict
 
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify, request, Response
 
 # No longer importing services directly, will use current_app
 from ...util.exceptions import (  # Keep specific exceptions needed
@@ -19,7 +20,7 @@ config_bp = Blueprint("config_bp", __name__, url_prefix="/config")
 
 
 @config_bp.route("", methods=["GET"])
-def get_config():
+def get_config() -> Response:
     """Get current application configuration"""
     config_manager = current_app.config["SERVICES"]["config_manager"]
     try:
@@ -30,7 +31,7 @@ def get_config():
             "User": ["signature"],
         }
 
-        config_values = {}
+        config_values: Dict[str, Dict[str, Any]] = {}
         for section, keys in settings_to_expose.items():
             # Check if section exists
             if not config_manager.config.has_section(section):
@@ -88,7 +89,7 @@ def get_config():
 
 
 @config_bp.route("", methods=["POST"])
-def update_config():
+def update_config() -> Response:
     """Update application configuration"""
     config_manager = current_app.config["SERVICES"]["config_manager"]
     # Need direct access to llm_service instance to update it
@@ -199,7 +200,7 @@ def update_config():
 
 
 @config_bp.route("/signature", methods=["POST"])
-def update_signature():
+def update_signature() -> Response:
     """Update only the user signature."""
     config_manager = current_app.config["SERVICES"]["config_manager"]
     try:
@@ -217,13 +218,22 @@ def update_signature():
             config_manager.config.add_section("User")
 
         logger.info(f"Attempting to set [User] signature to: '{new_signature}'")
-        config_manager.config.set("User", "signature", str(new_signature))
-        logger.info("Value set in config object. Attempting to save...")
+
+        # Update the value
+        config_manager.config.set("User", "signature", new_signature)
+
+        # Save the changes
         config_manager.save()
-        logger.info("User signature updated successfully.")
+
+        logger.info(f"Successfully updated signature to: '{new_signature}'")
+
         return jsonify(
-            {"status": "success", "message": "Signature updated successfully."},
-        ), 200
+            {
+                "success": True,
+                "message": "Signature updated successfully.",
+                "signature": new_signature,
+            },
+        )
 
     except ValidationError:
         raise  # Let the error handler catch validation errors

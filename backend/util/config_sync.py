@@ -1,18 +1,19 @@
 import configparser
 import logging
 import os
+from typing import Tuple, Optional, Dict, Any, List, Union, Callable, cast
 
 logger = logging.getLogger(__name__)
 
 
-def get_config_paths(root_dir):
+def get_config_paths(root_dir: str) -> Tuple[str, str]:
     """Get the paths for root and backend config files."""
     root_config_path = os.path.join(root_dir, "config.ini")
     backend_config_path = os.path.join(root_dir, "backend", "config", "config.ini")
     return root_config_path, backend_config_path
 
 
-def sync_configs(root_dir):
+def sync_configs(root_dir: str) -> bool:
     """Synchronizes configuration settings between root and backend config files."""
     root_config_path, backend_config_path = get_config_paths(root_dir)
 

@@ -4,7 +4,7 @@ Authentication related routes
 
 import logging
 
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, Response
 
 # No longer importing services directly, will use current_app
 from ...util.exceptions import AuthError  # Keep specific exceptions needed
@@ -15,7 +15,7 @@ auth_bp = Blueprint("auth_bp", __name__, url_prefix="/auth")
 
 
 @auth_bp.route("/status", methods=["GET"])
-def auth_status():
+def auth_status() -> Response:
     """Check authentication status"""
     # Access services via current_app context
     auth_service = current_app.config["SERVICES"]["auth_service"]
@@ -24,7 +24,7 @@ def auth_status():
 
 
 @auth_bp.route("/login", methods=["POST"])
-def auth_login():
+def auth_login() -> Response:
     """Initiate OAuth login flow"""
     # Access services via current_app context
     auth_service = current_app.config["SERVICES"]["auth_service"]
