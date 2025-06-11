@@ -2,11 +2,11 @@
 Debug script for Google OAuth authentication
 """
 
+import importlib
 import json
 import logging
 import os
 import sys
-import importlib
 from typing import TYPE_CHECKING, Any
 
 # Configure verbose logging

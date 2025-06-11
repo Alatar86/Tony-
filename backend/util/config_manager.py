@@ -22,7 +22,7 @@ class ConfigurationManager:
 
     # Environment variable prefix for configuration overrides
     ENV_PREFIX = "APP_"
-    
+
     # Singleton instance
     _instance: Optional['ConfigurationManager'] = None
 
@@ -86,10 +86,10 @@ class ConfigurationManager:
     def get_instance(cls, config_file: Optional[str] = None) -> 'ConfigurationManager':
         """
         Get the singleton instance of ConfigurationManager.
-        
+
         Args:
             config_file (Optional[str]): Path to the configuration file
-        
+
         Returns:
             ConfigurationManager: The singleton instance
         """
@@ -201,10 +201,10 @@ class ConfigurationManager:
     def get_section(self, section: str) -> Dict[str, str]:
         """
         Get an entire configuration section as a dictionary.
-        
+
         Args:
             section (str): Configuration section name
-            
+
         Returns:
             Dict[str, str]: Dictionary of key-value pairs in the section
         """

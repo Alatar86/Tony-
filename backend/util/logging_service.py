@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
-from typing import Any, Optional, Union, Type
+from typing import Any, Optional, Type
 
 # Improved error handling for the json logger import
 JSON_LOGGER_AVAILABLE = False
@@ -98,7 +98,7 @@ class LoggingService:
     def _configure_formatter(self) -> logging.Formatter:
         """
         Configure and return the appropriate formatter based on availability of JsonFormatter.
-        
+
         Returns:
             logging.Formatter: Either JsonFormatter with specific arguments or FallbackFormatter
         """
@@ -122,7 +122,7 @@ class LoggingService:
             formatter = logging.Formatter(
                 "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
-            
+
         return formatter
 
     def _configure_logging(self) -> None:

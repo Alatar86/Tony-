@@ -7,7 +7,7 @@ mocking external dependencies to ensure isolated testing.
 
 import os
 import unittest
-from typing import Any, Dict, Optional
+from typing import Any
 from unittest.mock import MagicMock, mock_open, patch
 
 from backend.services.google_auth_service import GoogleAuthService

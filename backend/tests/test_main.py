@@ -11,7 +11,7 @@ class TestMainModule:
     def test_run_server(self, mock_api_server: MagicMock) -> None:
         """Test that run_server initializes and runs the API server."""
         # Dynamically import to avoid mypy following backend.main
-        run_server = getattr(importlib.import_module("backend.main"), "run_server")
+        run_server = importlib.import_module("backend.main").run_server
 
         # Configure the mock
         mock_api_server_instance = mock_api_server.return_value
@@ -30,7 +30,7 @@ class TestMainModule:
     def test_main_calls_run_server(self, mock_run_server: MagicMock) -> None:
         """Test that main calls init_logging and run_server."""
         # Dynamically import to avoid mypy following backend.main
-        main_func = getattr(importlib.import_module("backend.main"), "main")
+        main_func = importlib.import_module("backend.main").main
 
         # Configure the mock
         mock_run_server.return_value = 0

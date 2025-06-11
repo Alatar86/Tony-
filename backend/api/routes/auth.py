@@ -4,7 +4,7 @@ Authentication related routes
 
 import logging
 
-from flask import Blueprint, current_app, jsonify, Response
+from flask import Blueprint, Response, current_app, jsonify
 
 # No longer importing services directly, will use current_app
 from ...util.exceptions import AuthError  # Keep specific exceptions needed

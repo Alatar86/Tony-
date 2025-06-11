@@ -9,7 +9,7 @@ import logging
 import socket
 from email.mime.text import MIMEText
 from email.utils import formatdate, make_msgid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import httplib2
 from google_auth_httplib2 import AuthorizedHttp
@@ -276,7 +276,7 @@ class GmailApiService:
                     if response is None:
                         metadata_results[request_id] = None
                         return
-                        
+
                     headers = response.get("payload", {}).get("headers", [])
                     subject = next(
                         (h["value"] for h in headers if h["name"].lower() == "subject"),

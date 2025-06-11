@@ -4,16 +4,16 @@ Google Authentication Service
 This service handles OAuth 2.0 authentication with Google for Gmail API access.
 """
 
+import importlib.resources
 import json
 import logging
-import importlib.resources
 import os
 from typing import Any, Dict, Optional
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.exceptions import RefreshError
 
 from ..util.config_manager import ConfigurationManager
 from ..util.exceptions import AuthError, ConfigError
