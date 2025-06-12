@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
-// import java.io.IOException; // Not directly used
 
 /**
  * Manages checking backend status and updating relevant UI elements.

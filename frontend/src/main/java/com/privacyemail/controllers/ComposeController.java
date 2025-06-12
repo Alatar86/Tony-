@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import com.privacyemail.api.IApiClient;
 import com.privacyemail.models.ApiResult;
 import com.privacyemail.models.EmailDetails;
-import com.privacyemail.models.ApiError;
 import com.privacyemail.models.ConfigData;
 
 import java.util.Map;
@@ -26,7 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.lang.StringBuilder;
-import java.net.http.HttpResponse;
 
 /**
  * Controller for the email compose window.

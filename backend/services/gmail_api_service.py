@@ -96,7 +96,12 @@ class GmailApiService:
             logger.error(f"Failed to create Gmail API service: {e}")
             raise GmailApiError(f"Failed to create Gmail API service: {str(e)}") from e
 
-    def list_messages(self, label_id: Optional[str] = None, thread_id: Optional[str] = None, max_results: int = 50) -> List[str]:
+    def list_messages(
+        self,
+        label_id: Optional[str] = None,
+        thread_id: Optional[str] = None,
+        max_results: int = 50,
+    ) -> List[str]:
         """
         List messages, optionally filtered by label.
 
@@ -234,25 +239,34 @@ class GmailApiService:
             logger.error(f"Error getting message metadata: {e}")
             raise GmailApiError(f"Error getting message metadata: {str(e)}") from e
 
-    def get_multiple_messages_metadata(self, message_ids: List[str]) -> Dict[str, Optional[Dict[str, Any]]]:
+    def get_multiple_messages_metadata(
+        self, message_ids: List[str]
+    ) -> Dict[str, Optional[Dict[str, Any]]]:
         """
         Fetch metadata for multiple messages efficiently using batch requests.
 
         Args:
-            message_ids: A list of message IDs to fetch metadata for.
+            message_ids (List[str]): List of message IDs to fetch metadata for
 
         Returns:
-            A dictionary where keys are message IDs and values are metadata dicts
-            (containing subject, from, date etc.), or None if metadata fetch
-            failed for that ID.
-            Returns an empty dict if input list is empty.
+            Dict[str, Optional[Dict[str, Any]]]: Dictionary mapping message IDs
+                to their metadata. Values can be None if the message wasn't found
+                or an error occurred.
+
+        Raises:
+            GmailApiError: If batch request fails
         """
         if not message_ids:
             return {}
 
-        metadata_results: Dict[str, Optional[Dict[str, Any]]] = {}  # Dictionary to store results, keyed by message_id
+        # Dictionary to store results, keyed by message_id
+        metadata_results: Dict[str, Optional[Dict[str, Any]]] = {}
 
-        def _batch_callback(request_id: str, response: Optional[Dict[str, Any]], exception: Optional[Exception]) -> None:
+        def _batch_callback(
+            request_id: str,
+            response: Optional[Dict[str, Any]],
+            exception: Optional[Exception],
+        ) -> None:
             """Callback function for the batch request."""
             if exception:
                 # Handle errors for individual requests if needed
@@ -574,28 +588,36 @@ class GmailApiService:
             logger.error(f"Error deleting message: {e}")
             raise GmailApiError(f"Error deleting message: {str(e)}") from e
 
-    def send_email(self, to: str, subject: str, body: str, reply_to: Optional[str] = None) -> Dict[str, Any]:
+    def send_email(
+        self,
+        to: str,
+        subject: str,
+        body: str,
+        reply_to: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Send an email through Gmail API.
 
         Args:
             to (str): Recipient email address
             subject (str): Email subject
-            body (str): Email body
-            reply_to (str, optional): Reply-to email address. Defaults to None.
+            body (str): Email body content
+            reply_to (Optional[str]): Message ID to reply to (optional)
 
         Returns:
-            dict: Response from Gmail API
+            dict: Response from Gmail API containing message details
 
         Raises:
+            ValidationError: If required parameters are missing or invalid
             GmailApiError: If API call fails
-            ValidationError: If input parameters are invalid
         """
         try:
             # Validate required parameters
             if not to or not isinstance(to, str):
                 logger.error("Invalid 'to' parameter")
-                raise ValidationError("Email recipient is required and must be a string")
+                raise ValidationError(
+                    "Email recipient is required and must be a string"
+                )
 
             if not subject or not isinstance(subject, str):
                 logger.error("Invalid 'subject' parameter")
@@ -734,17 +756,22 @@ class GmailApiService:
             logger.error(f"Error sending email: {e}")
             raise GmailApiError(f"Error sending email: {str(e)}") from e
 
-    def _get_body_text(self, payload: Dict[str, Any], depth: int = 0, max_depth: int = 10) -> tuple[str, bool]:
+    def _get_body_text(
+        self,
+        payload: Dict[str, Any],
+        depth: int = 0,
+        max_depth: int = 10,
+    ) -> tuple[str, bool]:
         """
         Extract the body text from a Gmail message payload.
 
         Args:
-            payload: Gmail message payload
-            depth: Current recursion depth
-            max_depth: Maximum recursion depth
+            payload (Dict[str, Any]): Gmail message payload
+            depth (int): Current recursion depth
+            max_depth (int): Maximum recursion depth
 
         Returns:
-            tuple: (body_text, is_html) where is_html indicates if content was HTML
+            tuple[str, bool]: (body_text, is_html)
         """
         # Guard against excessive recursion
         if depth > max_depth:
@@ -932,27 +959,37 @@ class GmailApiService:
             logger.error(f"Error getting user profile: {e}")
             return None
 
-    def modify_message_labels(self, message_id: str, add_labels: Optional[List[str]] = None, remove_labels: Optional[List[str]] = None) -> Dict[str, Any]:
+    def modify_message_labels(
+        self,
+        message_id: str,
+        add_labels: Optional[List[str]] = None,
+        remove_labels: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """
-        Modify labels on a message.
+        Modify labels on a Gmail message (e.g., archive, mark as read/unread).
 
         Args:
             message_id (str): Gmail message ID
-            add_labels (list, optional): Labels to add. Defaults to None.
-            remove_labels (list, optional): Labels to remove. Defaults to None.
+            add_labels (Optional[List[str]]): Labels to add to the message
+            remove_labels (Optional[List[str]]): Labels to remove from the message
 
         Returns:
-            dict: Response from Gmail API
+            dict: Modified message details
 
         Raises:
+            ValidationError: If invalid parameters are provided
             GmailApiError: If API call fails
-            NotFoundError: If the message is not found
-            ValidationError: If no labels are specified
         """
         try:
+            # Validate required parameters
+            if not message_id or not isinstance(message_id, str):
+                raise ValidationError("Message ID is required and must be a string")
+
             # Validate that at least one label operation is specified
             if not add_labels and not remove_labels:
-                raise ValidationError("At least one of add_labels or remove_labels must be specified")
+                raise ValidationError(
+                    "At least one of add_labels or remove_labels must be specified"
+                )
 
             # Ensure we have a service
             service = self._get_service()

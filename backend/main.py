@@ -39,7 +39,9 @@ def run_server(app: Flask) -> None:
 
     # Get debug mode configuration and convert to boolean
     debug_mode_str = config.get('development', 'debug_mode', fallback='false')
-    debug = (debug_mode_str.lower() if debug_mode_str else 'false') in ('true', '1', 't')
+    debug = (
+        debug_mode_str.lower() if debug_mode_str else 'false'
+    ) in ('true', '1', 't')
 
     # The reloader should be disabled if running in a production environment
     # or if managed by an external tool like Gunicorn.

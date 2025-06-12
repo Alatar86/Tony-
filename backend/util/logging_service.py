@@ -97,15 +97,18 @@ class LoggingService:
 
     def _configure_formatter(self) -> logging.Formatter:
         """
-        Configure and return the appropriate formatter based on availability of JsonFormatter.
+        Configure and return the appropriate formatter based on availability
+        of JsonFormatter.
 
         Returns:
-            logging.Formatter: Either JsonFormatter with specific arguments or FallbackFormatter
+            logging.Formatter: Either JsonFormatter with specific arguments
+                               or FallbackFormatter
         """
         if JSON_LOGGER_AVAILABLE:
             # Create JsonFormatter with all specific arguments
             try:
-                # Use type: ignore to suppress Mypy warnings for JsonFormatter-specific arguments
+                # Use type: ignore to suppress Mypy warnings for
+                # JsonFormatter-specific arguments
                 formatter = JsonFormatterType(  # type: ignore[call-arg]
                     "%(timestamp)s %(level)s %(name)s %(message)s",
                     rename_fields={
@@ -116,7 +119,9 @@ class LoggingService:
                 )
             except TypeError:
                 # Fallback if JsonFormatter doesn't support these arguments
-                formatter = JsonFormatterType("%(asctime)s %(levelname)s %(name)s %(message)s")
+                formatter = JsonFormatterType(
+                    "%(asctime)s %(levelname)s %(name)s %(message)s"
+                )
         else:
             # Create FallbackFormatter (standard logging formatter)
             formatter = logging.Formatter(

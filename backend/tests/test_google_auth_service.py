@@ -98,7 +98,9 @@ class TestGoogleAuthService(unittest.TestCase):
 
     @patch.dict(os.environ, {"GOOGLE_CLIENT_SECRET_JSON_PATH": "/path/to/secrets.json"})
     @patch("builtins.open", new_callable=mock_open, read_data="invalid_json")
-    def test_load_client_secrets_from_env_invalid_json_file(self, mock_file: Any) -> None:
+    def test_load_client_secrets_from_env_invalid_json_file(
+        self, mock_file: Any
+    ) -> None:
         """Test handling of invalid JSON in client secrets file"""
         # Assert that the method raises the expected exception
         with self.assertRaises(ConfigError):

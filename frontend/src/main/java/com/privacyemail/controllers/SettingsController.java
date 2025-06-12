@@ -6,7 +6,6 @@ import com.privacyemail.models.ConfigData;
 import com.privacyemail.config.FrontendPreferences;
 import com.privacyemail.config.ThemeManager;
 import com.privacyemail.config.Configuration;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -27,7 +26,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SettingsController {

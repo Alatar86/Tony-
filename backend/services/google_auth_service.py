@@ -27,13 +27,18 @@ class GoogleAuthService:
     Service responsible for handling OAuth 2.0 authentication with Google.
     """
 
-    def __init__(self, config_manager: ConfigurationManager, token_storage: SecureTokenStorage) -> None:
+    def __init__(
+        self, config_manager: ConfigurationManager, token_storage: SecureTokenStorage
+    ) -> None:
         """
         Initialize the GoogleAuthService.
 
         Args:
-            config_manager: ConfigurationManager instance for accessing configuration
-            token_storage: SecureTokenStorage instance for managing OAuth tokens
+            config_manager (ConfigurationManager): Configuration manager instance
+            token_storage (SecureTokenStorage): Token storage service
+
+        Raises:
+            ConfigError: If required configuration is missing
         """
         self.config_manager = config_manager
         self.token_storage = token_storage
@@ -224,17 +229,22 @@ class GoogleAuthService:
             <head>
                 <title>Authentication Successful</title>
                 <style>
-                    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .success { color: #28a745; font-size: 24px; margin-bottom: 20px; }
-                    .info { color: #6c757d; font-size: 16px; }
+                    body {{
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        margin-top: 50px;
+                    }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .success {{ color: #28a745; font-size: 24px; margin-bottom: 20px; }}
+                    .info {{ color: #6c757d; font-size: 16px; line-height: 1.5; }}
                 </style>
             </head>
             <body>
                 <div class="container">
                     <div class="success">✓ Authentication Successful!</div>
                     <div class="info">
-                        You have successfully authorized the Email Agent to access your Gmail account.
+                        You have successfully authorized the Email Agent to access
+                        your Gmail account.
                         <br><br>
                         You can now close this tab and return to the application.
                     </div>

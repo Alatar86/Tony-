@@ -180,7 +180,9 @@ class ConfigurationManager:
             )
             return env_value
 
-    def get(self, section: str, key: str, fallback: Optional[Any] = None) -> Optional[str]:
+    def get(
+        self, section: str, key: str, fallback: Optional[Any] = None
+    ) -> Optional[str]:
         """
         Get a configuration value.
 
@@ -214,7 +216,9 @@ class ConfigurationManager:
             logger.warning(f"Configuration section not found: {section}")
             return {}
 
-    def getint(self, section: str, key: str, fallback: Optional[int] = None) -> Optional[int]:
+    def getint(
+        self, section: str, key: str, fallback: Optional[int] = None
+    ) -> Optional[int]:
         """Get configuration value as integer"""
         try:
             return self.config.getint(section, key)
@@ -222,7 +226,9 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def getfloat(self, section: str, key: str, fallback: Optional[float] = None) -> Optional[float]:
+    def getfloat(
+        self, section: str, key: str, fallback: Optional[float] = None
+    ) -> Optional[float]:
         """Get configuration value as float"""
         try:
             return self.config.getfloat(section, key)
@@ -230,7 +236,9 @@ class ConfigurationManager:
             logger.warning(f"Configuration not found: [{section}] {key}. {e}")
             return fallback
 
-    def getboolean(self, section: str, key: str, fallback: Optional[bool] = None) -> Optional[bool]:
+    def getboolean(
+        self, section: str, key: str, fallback: Optional[bool] = None
+    ) -> Optional[bool]:
         """Get configuration value as boolean"""
         try:
             return self.config.getboolean(section, key)

@@ -436,20 +436,25 @@ class LocalLlmService:
             logger.error(f"Error checking Ollama status: {e}")
             return False
 
-    def get_suggestions_with_context(self, email_body: str, thread_context: str, is_reply: bool = False) -> List[str]:
+    def get_suggestions_with_context(
+        self,
+        email_body: str,
+        thread_context: str,
+        is_reply: bool = False,
+    ) -> List[str]:
         """
         Get reply suggestions for an email with conversation context.
 
         Args:
-            email_body (str): Body text of the email
-            thread_context (str): Previous messages in the thread
-            is_reply (bool): Whether this is a reply to a previous message
+            email_body (str): The email body text
+            thread_context (str): Context from the email thread
+            is_reply (bool): Whether this is a reply to an email
 
         Returns:
-            list: List of suggestion strings
+            List[str]: List of suggested reply texts
 
         Raises:
-            OllamaError: If communication with Ollama fails
+            OllamaError: If the request fails
         """
         # Validate input
         if not email_body or not isinstance(email_body, str):
